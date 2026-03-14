@@ -725,7 +725,11 @@ function scoreChannel(videos) {
     let status, statusClass, priority, priorityClass, priorityNum;
 
     // Determine repair priority
-    if (imps > 200 && ctr < 2.5) {
+    // VPI > 0.4 = YouTube is already pushing this video — never flag as broken
+    if (vpiV >= 0.4) {
+      status = 'Performing'; statusClass = 'pill-green';
+      priority = 'Hold'; priorityClass = 'p4'; priorityNum = 4;
+    } else if (imps > 200 && ctr < 2.5) {
       status = 'Repackage'; statusClass = 'pill-red';
       priority = 'High-priority'; priorityClass = 'p1'; priorityNum = 1;
     } else if (imps > 200 && ctr < 4) {
@@ -734,7 +738,7 @@ function scoreChannel(videos) {
     } else if (imps < 50 && ctr > 7) {
       status = 'Boost'; statusClass = 'pill-amber';
       priority = 'Opportunity'; priorityClass = 'p3'; priorityNum = 3;
-    } else if (ctr >= 4 && vpiV >= 0.3) {
+    } else if (ctr >= 4 && vpiV >= 0.2) {
       status = 'Performing'; statusClass = 'pill-green';
       priority = 'Hold'; priorityClass = 'p4'; priorityNum = 4;
     } else {
