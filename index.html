@@ -453,8 +453,14 @@ function scoreChannel(tableRows, chartRows, totalsRows) {
     const imps = Number(v['Impressions']) || 0;
     const ctr = Number(v['Impressions click-through rate (%)']) || 0;
     const avgViewSec = parseDuration(v['Average view duration'] || '');
+    const watchHours = parseFloat(v['Watch time (hours)'] || 0);
     const durSec = Number(v['Duration']) || 0;
-    const retPct = durSec > 0 ? (avgViewSec / durSec) * 100 : 0;
+    // Use average view duration if available, otherwise calc from watch time
+    const retPct = durSec > 0 && avgViewSec > 0
+      ? (avgViewSec / durSec) * 100
+      : (durSec > 0 && watchHours > 0 && (Number(v['Views']) || 0) > 0)
+        ? ((watchHours * 3600) / ((Number(v['Views']) || 1) * durSec)) * 100
+        : 0;
     const vpiV = imps > 0 ? views / imps : 0;
 
     // Momentum from Chart data
