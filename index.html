@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-
+<!-- saved from url=(0045)file:///C:/Users/david/Downloads/index_1.html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pressure Tested — Signal Diagnostic</title>
 <link rel="preconnect" href="https://fonts.googleapis.com/">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Barlow+Condensed:wght@400;700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="./index_files/css2" rel="stylesheet">
+<script src="./index_files/jszip.min.js.download"></script>
+<script src="./index_files/xlsx.full.min.js.download"></script>
 <style>
 :root {
   --navy-900:#0a0f1e;--navy-800:#0f1628;--navy-700:#162035;--navy-600:#1a2744;--navy-500:#243560;
@@ -84,8 +84,9 @@ body{background:var(--navy-800);color:var(--text);font-family:var(--sans);font-s
 .score-label{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-top:3px;}
 
 /* CHANNEL PULSE (from Totals) */
-.channel-pulse{background:var(--navy-700);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;}
+.channel-pulse{background:var(--navy-700);border:1px solid var(--amber-border);border-left:4px solid var(--amber);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1rem;display:flex;align-items:center;gap:2rem;flex-wrap:wrap;}
 .pulse-label{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;}
+.pulse-stat:first-child .pulse-label{color:var(--amber);font-size:11px;letter-spacing:0.12em;}
 .pulse-stat{flex:1;min-width:120px;}
 .pulse-val{font-family:var(--display);font-size:1.8rem;font-weight:700;color:var(--text);line-height:1;}
 .pulse-trend{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:4px;margin-top:4px;}
@@ -818,7 +819,7 @@ body{background:var(--navy-800);color:var(--text);font-family:var(--sans);font-s
 .score-num{font-family:var(--display);font-size:3rem;font-weight:800;line-height:1;}
 .score-denom{font-family:var(--display);font-size:1.3rem;color:var(--text3);}
 .score-label{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;}
-.channel-pulse{background:var(--navy-700);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1rem;display:flex;gap:2rem;flex-wrap:wrap;}
+.channel-pulse{background:var(--navy-700);border:1px solid var(--amber-border);border-left:4px solid var(--amber);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1rem;display:flex;gap:2rem;flex-wrap:wrap;}
 .pulse-label{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:4px;}
 .pulse-val{font-family:var(--display);font-size:1.6rem;font-weight:700;}
 .pulse-trend{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:4px;margin-top:4px;}
