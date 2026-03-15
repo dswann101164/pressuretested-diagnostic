@@ -533,23 +533,7 @@ function renderResults(data) {
         <div class="spotlight-stat"><div class="spotlight-val">${_bestVid.imps.toLocaleString()}</div><div class="spotlight-stat-label">Impressions</div></div>
       </div>
     </div>` : '';
-  const qualifiedVids = vids.filter(v => v.imps >= 50);
-  const bestVid = qualifiedVids.length > 0
-    ? [...qualifiedVids].sort((a, b) => b.ctr - a.ctr)[0]
-    : [...vids].sort((a, b) => b.views - a.views)[0];
-  const spotlightHTML = bestVid ? `
-    <div class="spotlight-card">
-      <div class="spotlight-left">
-        <div class="spotlight-eyebrow">⚡ Signal Spotlight — what's working</div>
-        <div class="spotlight-title">${esc(truncate(bestVid['Video title'], 70))}</div>
-        <div class="spotlight-desc">This is your benchmark. It's the clearest signal of what your audience responds to. Every future title, thumbnail, and topic should be measured against this one.</div>
-      </div>
-      <div class="spotlight-stats">
-        <div class="spotlight-stat"><div class="spotlight-val" style="color:var(--green)">${bestVid.ctr.toFixed(2)}%</div><div class="spotlight-stat-label">CTR</div></div>
-        <div class="spotlight-stat"><div class="spotlight-val">${bestVid.views}</div><div class="spotlight-stat-label">Views</div></div>
-        <div class="spotlight-stat"><div class="spotlight-val">${bestVid.imps.toLocaleString()}</div><div class="spotlight-stat-label">Impressions</div></div>
-      </div>
-    </div>` : '';
+
 
 
   // Channel pulse HTML
