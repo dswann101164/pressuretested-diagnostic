@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<!-- saved from url=(0045)file:///C:/Users/david/Downloads/index_2.html -->
+
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pressure Tested — Signal Diagnostic</title>
 <link rel="preconnect" href="https://fonts.googleapis.com/">
-<link href="./index_files/css2" rel="stylesheet">
-<script src="./index_files/jszip.min.js.download"></script>
-<script src="./index_files/xlsx.full.min.js.download"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Barlow+Condensed:wght@400;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root {
   --navy-900:#0a0f1e;--navy-800:#0f1628;--navy-700:#162035;--navy-600:#1a2744;--navy-500:#243560;
@@ -223,6 +223,17 @@ footer{background:var(--navy-900);border-top:1px solid var(--border);padding:2re
   .repair-head{padding:.5rem!important;}
   .repair-card{break-inside:avoid;}
 }
+
+.spotlight-card{background:rgba(76,175,125,0.08);border:1.5px solid rgba(76,175,125,0.5);border-left:4px solid var(--green);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:flex-start;justify-content:space-between;gap:2rem;flex-wrap:wrap;}
+.spotlight-left{flex:1;min-width:200px;}
+.spotlight-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--green);margin-bottom:.4rem;font-weight:600;}
+.spotlight-title{font-size:15px;font-weight:700;color:#ffffff;margin-bottom:.5rem;line-height:1.4;}
+.spotlight-desc{font-size:13px;color:rgba(255,255,255,0.8);line-height:1.6;}
+.spotlight-stats{display:flex;gap:1.5rem;flex-shrink:0;align-items:center;}
+.spotlight-stat{text-align:center;}
+.spotlight-val{font-family:var(--mono);font-size:1.4rem;font-weight:700;color:#ffffff;}
+.spotlight-stat-label{font-family:var(--mono);font-size:10px;text-transform:uppercase;color:rgba(255,255,255,0.45);letter-spacing:0.08em;margin-top:2px;}
+
 
 .spotlight-card{background:rgba(76,175,125,0.08);border:1.5px solid rgba(76,175,125,0.5);border-left:4px solid var(--green);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:flex-start;justify-content:space-between;gap:2rem;flex-wrap:wrap;}
 .spotlight-left{flex:1;min-width:200px;}
@@ -505,6 +516,23 @@ function renderResults(data) {
   const { vids, totalViews, totalImpressions, avgCTR, vpi, totalScore, constraint, totalsMonths, hasMomentum } = data;
   const scoreColor = totalScore < 30 ? 'score-danger' : totalScore < 50 ? 'score-warning' : totalScore < 70 ? 'score-ok' : 'score-good';
   const logoSrc = document.querySelector('.logo img').src;
+  const _qualVids = vids.filter(v => v.imps >= 50);
+  const _bestVid = _qualVids.length > 0
+    ? [..._qualVids].sort((a, b) => b.ctr - a.ctr)[0]
+    : [...vids].sort((a, b) => b.views - a.views)[0];
+  const spotlightHTML = _bestVid ? `
+    <div class="spotlight-card">
+      <div class="spotlight-left">
+        <div class="spotlight-eyebrow">⚡ Signal Spotlight — what's working</div>
+        <div class="spotlight-title">${esc(truncate(_bestVid['Video title'], 70))}</div>
+        <div class="spotlight-desc">This is your benchmark. Every future title, thumbnail, and topic should be measured against this one.</div>
+      </div>
+      <div class="spotlight-stats">
+        <div class="spotlight-stat"><div class="spotlight-val" style="color:var(--green)">${_bestVid.ctr.toFixed(2)}%</div><div class="spotlight-stat-label">CTR</div></div>
+        <div class="spotlight-stat"><div class="spotlight-val">${_bestVid.views}</div><div class="spotlight-stat-label">Views</div></div>
+        <div class="spotlight-stat"><div class="spotlight-val">${_bestVid.imps.toLocaleString()}</div><div class="spotlight-stat-label">Impressions</div></div>
+      </div>
+    </div>` : '';
   const qualifiedVids = vids.filter(v => v.imps >= 50);
   const bestVid = qualifiedVids.length > 0
     ? [...qualifiedVids].sort((a, b) => b.ctr - a.ctr)[0]
@@ -611,6 +639,8 @@ function renderResults(data) {
         <div class="constraint-desc">${esc(constraint.fix)}</div>
       </div>
     </div>
+
+    ${spotlightHTML}
 
     ${spotlightHTML}
 
