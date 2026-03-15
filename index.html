@@ -99,6 +99,15 @@ body{background:var(--navy-800);color:var(--text);font-family:var(--sans);font-s
 .kpi-label{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-top:5px;}
 
 .constraint-banner{background:var(--red-bg);border:1px solid var(--red-border);border-left:4px solid var(--red);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:flex-start;gap:12px;}
+.spotlight-card{background:var(--green-bg);border:1px solid var(--green-border);border-left:4px solid var(--green);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:flex-start;justify-content:space-between;gap:2rem;flex-wrap:wrap;}
+.spotlight-left{flex:1;min-width:200px;}
+.spotlight-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--green);margin-bottom:.4rem;}
+.spotlight-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:.5rem;line-height:1.4;}
+.spotlight-desc{font-size:13px;color:var(--text2);line-height:1.6;}
+.spotlight-stats{display:flex;gap:1.5rem;flex-shrink:0;align-items:center;}
+.spotlight-stat{text-align:center;}
+.spotlight-val{font-family:var(--mono);font-size:1.4rem;font-weight:700;color:var(--text);}
+.spotlight-stat-label{font-family:var(--mono);font-size:10px;text-transform:uppercase;color:var(--text3);letter-spacing:0.08em;margin-top:2px;}
 .constraint-dot{width:8px;height:8px;border-radius:50%;background:var(--red);flex-shrink:0;margin-top:6px;animation:pulse 2s ease-in-out infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
 .constraint-eyebrow{font-family:var(--mono);font-size:10px;color:var(--red);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:3px;}
@@ -484,6 +493,20 @@ function renderResults(data) {
   const { vids, totalViews, totalImpressions, avgCTR, vpi, totalScore, constraint, totalsMonths, hasMomentum } = data;
   const scoreColor = totalScore < 30 ? 'score-danger' : totalScore < 50 ? 'score-warning' : totalScore < 70 ? 'score-ok' : 'score-good';
   const logoSrc = document.querySelector('.logo img').src;
+  const bestVid = [...vids].sort((a, b) => b.ctr - a.ctr)[0];
+  const spotlightHTML = bestVid ? `
+    <div class="spotlight-card">
+      <div class="spotlight-left">
+        <div class="spotlight-eyebrow">⚡ Signal Spotlight — what's working</div>
+        <div class="spotlight-title">${esc(truncate(bestVid['Video title'], 70))}</div>
+        <div class="spotlight-desc">This is your benchmark. It's the clearest signal of what your audience responds to. Every future title, thumbnail, and topic should be measured against this one.</div>
+      </div>
+      <div class="spotlight-stats">
+        <div class="spotlight-stat"><div class="spotlight-val" style="color:var(--green)">${bestVid.ctr.toFixed(2)}%</div><div class="spotlight-stat-label">CTR</div></div>
+        <div class="spotlight-stat"><div class="spotlight-val">${bestVid.views}</div><div class="spotlight-stat-label">Views</div></div>
+        <div class="spotlight-stat"><div class="spotlight-val">${bestVid.imps.toLocaleString()}</div><div class="spotlight-stat-label">Impressions</div></div>
+      </div>
+    </div>` : '';
 
   // Channel pulse HTML
   let pulseHTML = '';
@@ -572,6 +595,8 @@ function renderResults(data) {
         <div class="constraint-desc">${esc(constraint.fix)}</div>
       </div>
     </div>
+
+    ${spotlightHTML}
 
     <p class="queue-label">Repair queue — in priority order</p>
     <div class="repair-cards">${buildRepairCards(vids, data)}</div>
@@ -722,7 +747,7 @@ function downloadXLSX() {
   const dyingVids = vids.filter(v => v.momentum === 'down');
   const hiddenGem = vids.filter(v => v.imps < 60 && v.ctr > 6).sort((a,b) => b.ctr - a.ctr)[0];
   if (worstCTR) repairData.push([1, 'Packaging / CTR', worstCTR['Video title'], worstCTR.ctr.toFixed(2)+'% CTR', 'Rewrite title to lead with outcome. New thumbnail: high contrast, single focal point.']);
-  if (lowSignal.length>=2) repairData.push([2, 'Topic Clarity', lowSignal.length+' videos under 10 views', lowSignal.length+' videos', 'Re-angle titles/thumbnails toward same audience as top performer.']);
+  if (lowSignal.length>=2) repairData.push([2, 'Topic Consistency', lowSignal.length+' videos under 10 views', lowSignal.length+' videos', 'Re-angle titles/thumbnails toward same audience as top performer.']);
   if (dyingVids.length>0) repairData.push(['2b', 'Momentum', dyingVids.map(v=>v['Video title']).join('; '), 'Declining', 'Add end screen cards from these to your top performer.']);
   if (hiddenGem) repairData.push([3, 'Distribution', hiddenGem['Video title'], hiddenGem.ctr.toFixed(1)+'% CTR, '+hiddenGem.imps+' imps', 'Boost with Community post + end screen from top performer.']);
   repairData.push([4, 'Upload Velocity', 'All videos', 'Monitor', '2 uploads/week, no gap >5 days.']);
@@ -900,7 +925,7 @@ function buildRepairCards(vids, data) {
 
   if (worstCTR) cards.push(`<div class="repair-card"><div class="repair-head"><div class="p-badge p1">1</div><div class="repair-meta"><div class="repair-signal">Packaging / CTR</div><div class="repair-title">${esc(truncate(worstCTR['Video title'],55))}</div></div><div class="repair-stat stat-red">${worstCTR.ctr.toFixed(2)}% CTR</div><div class="chevron">▾</div></div><div class="repair-body"><div class="body-section"><div class="body-label">Why it's broken</div><div class="body-text">YouTube served this video ${worstCTR.imps.toLocaleString()} impressions. Only ${worstCTR.views} clicked (${worstCTR.ctr.toFixed(2)}%). Healthy range is 4–8%. The packaging — thumbnail and title — isn't matching audience expectations.</div></div><div class="body-section"><div class="body-label">The numbers</div><div class="chips"><span class="chip bad">${worstCTR.imps.toLocaleString()} impressions</span><span class="chip bad">${worstCTR.views} clicks (${worstCTR.ctr.toFixed(2)}%)</span><span class="chip">Channel avg: ${avgCTR.toFixed(2)}%</span><span class="chip">Target: 4–8%</span></div></div><div class="action-box"><div class="action-arrow">→</div><div class="action-text"><strong>Repair:</strong> Rewrite the title to lead with the outcome or problem. New thumbnail: high contrast, single focal point, strong emotion or curiosity gap. Must answer "what's in it for me?" before the click.</div></div></div></div>`);
 
-  if (lowSignal.length >= 2) cards.push(`<div class="repair-card"><div class="repair-head"><div class="p-badge p2">2</div><div class="repair-meta"><div class="repair-signal">Topic clarity / Channel identity</div><div class="repair-title">${lowSignal.length} videos with fewer than 10 views</div></div><div class="repair-stat stat-yellow">${lowSignal.length} videos</div><div class="chevron">▾</div></div><div class="repair-body"><div class="body-section"><div class="body-label">Why it matters</div><div class="body-text">YouTube builds an audience model from each video. Multiple videos failing to attract consistent viewers means the algorithm can't decide who to send your content to.</div></div><div class="body-section"><div class="body-label">Underperforming videos</div><div class="chips">${lowSignal.map(v=>`<span class="chip bad">${esc(truncate(v['Video title'],38))}</span>`).join('')}${bestVid?`<span class="chip good">${esc(truncate(bestVid['Video title'],38))} ✓</span>`:''}</div></div><div class="action-box"><div class="action-arrow">→</div><div class="action-text"><strong>Repair:</strong> Re-angle underperforming titles and thumbnails toward the same audience and problem as your top performer. Consistency in audience targeting beats variety at this stage.</div></div></div></div>`);
+  if (lowSignal.length >= 2) cards.push(`<div class="repair-card"><div class="repair-head"><div class="p-badge p2">2</div><div class="repair-meta"><div class="repair-signal">Topic Consistency / Channel identity</div><div class="repair-title">${lowSignal.length} videos with fewer than 10 views</div></div><div class="repair-stat stat-yellow">${lowSignal.length} videos</div><div class="chevron">▾</div></div><div class="repair-body"><div class="body-section"><div class="body-label">Why it matters</div><div class="body-text">YouTube builds an audience model from each video. Multiple videos failing to attract consistent viewers means the algorithm can't decide who to send your content to.</div></div><div class="body-section"><div class="body-label">Underperforming videos</div><div class="chips">${lowSignal.map(v=>`<span class="chip bad">${esc(truncate(v['Video title'],38))}</span>`).join('')}${bestVid?`<span class="chip good">${esc(truncate(bestVid['Video title'],38))} ✓</span>`:''}</div></div><div class="action-box"><div class="action-arrow">→</div><div class="action-text"><strong>Repair:</strong> Re-angle underperforming titles and thumbnails toward the same audience and problem as your top performer. Consistency in audience targeting beats variety at this stage.</div></div></div></div>`);
 
   if (dyingVids.length > 0) cards.push(`<div class="repair-card"><div class="repair-head"><div class="p-badge p2">2b</div><div class="repair-meta"><div class="repair-signal">Momentum / Declining videos</div><div class="repair-title">${dyingVids.length} video${dyingVids.length>1?'s':''} losing views month-over-month</div></div><div class="repair-stat stat-red">↓ Declining</div><div class="chevron">▾</div></div><div class="repair-body"><div class="body-section"><div class="body-label">Which videos</div><div class="chips">${dyingVids.map(v=>`<span class="chip bad">${esc(truncate(v['Video title'],38))} (${v.momFeb}→${v.momMar})</span>`).join('')}</div></div><div class="action-box"><div class="action-arrow">→</div><div class="action-text"><strong>Repair:</strong> Add end screen cards pointing from these videos to your current top performer. A decaying video can still feed your channel's best signal.</div></div></div></div>`);
 
