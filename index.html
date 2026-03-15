@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root {
   --navy-900:#0a0f1e;--navy-800:#0f1628;--navy-700:#162035;--navy-600:#1a2744;--navy-500:#243560;
@@ -162,11 +163,22 @@ td.title-cell{color:var(--text);min-width:240px;max-width:320px;font-size:13px;}
 .mom-flat{color:var(--amber);}
 .mom-new{color:var(--text3);font-size:11px;font-family:var(--mono);}
 
-/* DOWNLOAD REPORT BUTTON */
-.download-row{display:flex;justify-content:center;gap:1rem;padding:1.5rem 0 .5rem;flex-wrap:wrap;}
-.download-btn{display:inline-flex;align-items:center;gap:8px;background:var(--amber);color:var(--navy-900);font-family:var(--display);font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:10px 24px;border-radius:var(--radius);border:none;cursor:pointer;transition:background .15s;}
-.download-btn:hover{background:var(--amber-light);}
-.download-btn svg{width:16px;height:16px;}
+/* DOWNLOAD BUTTONS */
+.download-row{display:flex;justify-content:center;align-items:center;gap:1rem;padding:1.5rem 0 .5rem;flex-wrap:wrap;}
+.dl-group{display:flex;border-radius:var(--radius);overflow:hidden;border:1px solid var(--amber);}
+.dl-main{display:inline-flex;align-items:center;gap:8px;background:var(--amber);color:var(--navy-900);font-family:var(--display);font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:10px 20px;border:none;cursor:pointer;transition:background .15s;}
+.dl-main:hover{background:var(--amber-light);}
+.dl-main svg{width:16px;height:16px;flex-shrink:0;}
+.dl-divider{width:1px;background:rgba(0,0,0,0.2);}
+.dl-dropdown{position:relative;}
+.dl-arrow{display:flex;align-items:center;justify-content:center;width:36px;background:var(--amber);color:var(--navy-900);border:none;cursor:pointer;font-size:12px;transition:background .15s;height:100%;}
+.dl-arrow:hover{background:var(--amber-light);}
+.dl-menu{display:none;position:absolute;bottom:calc(100% + 6px);right:0;background:var(--navy-900);border:1px solid var(--border2);border-radius:var(--radius);overflow:hidden;min-width:180px;z-index:50;box-shadow:0 4px 20px rgba(0,0,0,0.4);}
+.dl-menu.open{display:block;}
+.dl-item{display:flex;align-items:center;gap:10px;padding:.7rem 1rem;font-family:var(--mono);font-size:12px;color:var(--text2);cursor:pointer;transition:background .1s;border:none;background:none;width:100%;text-align:left;}
+.dl-item:hover{background:var(--navy-700);color:var(--amber);}
+.dl-item-icon{width:14px;height:14px;flex-shrink:0;}
+.dl-item-badge{font-size:10px;padding:1px 5px;border-radius:3px;background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border);margin-left:auto;}
 .reset-btn{display:inline-flex;align-items:center;gap:6px;background:none;border:1px solid var(--border2);border-radius:var(--radius);color:var(--text3);font-family:var(--mono);font-size:11px;padding:8px 20px;cursor:pointer;transition:all .15s;letter-spacing:0.04em;}
 .reset-btn:hover{color:var(--amber);border-color:var(--amber);}
 
@@ -461,8 +473,10 @@ function scoreChannel(tableRows, chartRows, totalsRows) {
   ];
   scores.sort((a, b) => (a.score / a.max) - (b.score / b.max));
 
-  return { vids: enriched, totalViews, totalImpressions, avgCTR, vpi,
+  const result = { vids: enriched, totalViews, totalImpressions, avgCTR, vpi,
            totalScore, constraint: scores[0], totalsMonths, hasMomentum: Object.keys(momentumMap).length > 0 };
+  window._lastData = result;
+  return result;
 }
 
 // ── RENDER ──
@@ -573,10 +587,35 @@ function renderResults(data) {
     </div>
 
     <div class="download-row">
-      <button class="download-btn" onclick="downloadReport(${totalScore})">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Download Report
-      </button>
+      <div class="dl-group">
+        <button class="dl-main" onclick="downloadXLSX()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download Report (.xlsx)
+        </button>
+        <div class="dl-divider"></div>
+        <div class="dl-dropdown">
+          <button class="dl-arrow" onclick="toggleDlMenu(event)">▲</button>
+          <div class="dl-menu" id="dlMenu">
+            <button class="dl-item" onclick="downloadXLSX();closeDlMenu()">
+              <svg class="dl-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9l6 6M15 9l-6 6"/></svg>
+              Excel (.xlsx)
+              <span class="dl-item-badge">recommended</span>
+            </button>
+            <button class="dl-item" onclick="downloadCSV();closeDlMenu()">
+              <svg class="dl-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              CSV (.csv)
+            </button>
+            <button class="dl-item" onclick="downloadPDF();closeDlMenu()">
+              <svg class="dl-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              PDF (print dialog)
+            </button>
+            <button class="dl-item" onclick="downloadHTML();closeDlMenu()">
+              <svg class="dl-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+              HTML Report
+            </button>
+          </div>
+        </div>
+      </div>
       <button class="reset-btn" onclick="resetTool()">← Analyze a different channel</button>
     </div>`;
 
@@ -592,7 +631,122 @@ function renderResults(data) {
   document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// ── DOWNLOAD REPORT ──
+// ── DOWNLOAD MENU ──
+function toggleDlMenu(e) {
+  e.stopPropagation();
+  document.getElementById('dlMenu').classList.toggle('open');
+}
+function closeDlMenu() {
+  document.getElementById('dlMenu').classList.remove('open');
+}
+document.addEventListener('click', () => closeDlMenu());
+
+// ── DOWNLOAD XLSX ──
+function downloadXLSX() {
+  if (!window._lastData) return;
+  const { vids, totalViews, totalImpressions, avgCTR, vpi, totalScore, constraint, totalsMonths } = window._lastData;
+
+  const wb = XLSX.utils.book_new();
+
+  // Sheet 1: Summary
+  const summaryData = [
+    ['Pressure Tested — Signal Diagnostic Report'],
+    ['Generated', new Date().toLocaleDateString()],
+    [''],
+    ['SIGNAL SCORE', totalScore + '/100'],
+    ['Primary Constraint', constraint.name],
+    ['Fix', constraint.fix],
+    [''],
+    ['CHANNEL METRICS'],
+    ['Total Views', totalViews],
+    ['Total Impressions', totalImpressions],
+    ['Avg CTR', avgCTR.toFixed(2) + '%'],
+    ['VPI', vpi.toFixed(3)],
+    ['Videos Analyzed', vids.length],
+  ];
+  if (totalsMonths.length >= 2) {
+    const prev = totalsMonths[totalsMonths.length-2];
+    const curr = totalsMonths[totalsMonths.length-1];
+    summaryData.push(['']);
+    summaryData.push(['CHANNEL PULSE']);
+    summaryData.push([prev.month + ' Views', prev.views]);
+    summaryData.push([curr.month + ' Views', curr.views]);
+    const pct = prev.views > 0 ? ((curr.views - prev.views)/prev.views*100).toFixed(0) : 0;
+    summaryData.push(['Month-over-Month', pct + '%']);
+  }
+  const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+  wsSummary['!cols'] = [{wch:30},{wch:50}];
+  XLSX.utils.book_append_sheet(wb, wsSummary, 'Summary');
+
+  // Sheet 2: Video Breakdown
+  const headers = ['Video Title', 'Published', 'Views', 'Impressions', 'CTR %', 'VPI', 'Retention %', 'Avg View Duration (s)', 'Duration (s)', 'Momentum', 'Status'];
+  const videoData = [headers, ...vids.map(v => [
+    v['Video title'] || '',
+    v['Video publish time'] || '',
+    v.views,
+    v.imps,
+    parseFloat(v.ctr.toFixed(2)),
+    parseFloat(v.vpiV.toFixed(3)),
+    v.retPct > 0 ? parseFloat(v.retPct.toFixed(1)) : '',
+    v.avgViewSec || '',
+    v.durSec || '',
+    v.momentum === 'up' ? '↑ Growing' : v.momentum === 'down' ? '↓ Declining' : v.momentum === 'flat' ? '→ Holding' : 'New',
+    v.status
+  ])];
+  const wsVideos = XLSX.utils.aoa_to_sheet(videoData);
+  wsVideos['!cols'] = [{wch:50},{wch:14},{wch:8},{wch:12},{wch:8},{wch:8},{wch:12},{wch:18},{wch:12},{wch:12},{wch:14}];
+  XLSX.utils.book_append_sheet(wb, wsVideos, 'Video Breakdown');
+
+  // Sheet 3: Repair Queue
+  const repairHeaders = ['Priority', 'Signal Layer', 'Video / Issue', 'Metric', 'Repair Action'];
+  const repairData = [repairHeaders];
+  const worstCTR = vids.filter(v => v.imps > 100).sort((a,b) => a.ctr - b.ctr)[0];
+  const lowSignal = vids.filter(v => v.views < 10);
+  const dyingVids = vids.filter(v => v.momentum === 'down');
+  const hiddenGem = vids.filter(v => v.imps < 60 && v.ctr > 6).sort((a,b) => b.ctr - a.ctr)[0];
+  if (worstCTR) repairData.push([1, 'Packaging / CTR', worstCTR['Video title'], worstCTR.ctr.toFixed(2)+'% CTR', 'Rewrite title to lead with outcome. New thumbnail: high contrast, single focal point.']);
+  if (lowSignal.length>=2) repairData.push([2, 'Topic Clarity', lowSignal.length+' videos under 10 views', lowSignal.length+' videos', 'Re-angle titles/thumbnails toward same audience as top performer.']);
+  if (dyingVids.length>0) repairData.push(['2b', 'Momentum', dyingVids.map(v=>v['Video title']).join('; '), 'Declining', 'Add end screen cards from these to your top performer.']);
+  if (hiddenGem) repairData.push([3, 'Distribution', hiddenGem['Video title'], hiddenGem.ctr.toFixed(1)+'% CTR, '+hiddenGem.imps+' imps', 'Boost with Community post + end screen from top performer.']);
+  repairData.push([4, 'Upload Velocity', 'All videos', 'Monitor', '2 uploads/week, no gap >5 days.']);
+  const wsRepair = XLSX.utils.aoa_to_sheet(repairData);
+  wsRepair['!cols'] = [{wch:8},{wch:20},{wch:50},{wch:20},{wch:60}];
+  XLSX.utils.book_append_sheet(wb, wsRepair, 'Repair Queue');
+
+  XLSX.writeFile(wb, 'pressure-tested-signal-report-'+new Date().toISOString().slice(0,10)+'.xlsx');
+}
+
+// ── DOWNLOAD CSV ──
+function downloadCSV() {
+  if (!window._lastData) return;
+  const { vids } = window._lastData;
+  const headers = ['Video Title','Published','Views','Impressions','CTR %','VPI','Retention %','Momentum','Status'];
+  const rows = vids.map(v => [
+    '"'+((v['Video title']||'').replace(/"/g,'""'))+'"',
+    '"'+(v['Video publish time']||'')+'"',
+    v.views, v.imps,
+    v.ctr.toFixed(2),
+    v.vpiV.toFixed(3),
+    v.retPct > 0 ? v.retPct.toFixed(1) : '',
+    v.momentum === 'up' ? 'Growing' : v.momentum === 'down' ? 'Declining' : v.momentum === 'flat' ? 'Holding' : 'New',
+    v.status
+  ].join(','));
+  const csv = [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'pressure-tested-signal-data-'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── DOWNLOAD PDF (print) ──
+function downloadPDF() {
+  window.print();
+}
+
+// ── DOWNLOAD HTML REPORT ──
 function downloadReport(score) {
   const content = document.getElementById('results').innerHTML;
   const logoSrc = document.querySelector('.logo img').src;
