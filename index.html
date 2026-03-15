@@ -649,19 +649,36 @@ function downloadXLSX() {
   const wb = XLSX.utils.book_new();
 
   // Sheet 1: Summary
+  // Recalculate component scores for breakdown
+  const _avgCTR = avgCTR;
+  const _impsPerVid = vids.length > 0 ? totalImpressions / vids.length : 0;
+  const _vpi = vpi;
+  const _ctrScore = _avgCTR < 2 ? 5 : _avgCTR < 3 ? 10 : _avgCTR < 4 ? 15 : _avgCTR < 5 ? 20 : _avgCTR < 8 ? 26 : 30;
+  const _impScore = _impsPerVid < 50 ? 5 : _impsPerVid < 100 ? 10 : _impsPerVid < 200 ? 16 : _impsPerVid < 400 ? 20 : 25;
+  const _vpiScore = _vpi < 0.1 ? 5 : _vpi < 0.2 ? 10 : _vpi < 0.35 ? 16 : _vpi < 0.5 ? 20 : 25;
+  const _velScore = vids.length < 3 ? 5 : vids.length < 6 ? 10 : vids.length < 10 ? 15 : 20;
+
   const summaryData = [
     ['Pressure Tested — Signal Diagnostic Report'],
     ['Generated', new Date().toLocaleDateString()],
+    ['pressuretested.co', ''],
     [''],
     ['SIGNAL SCORE', totalScore + '/100'],
     ['Primary Constraint', constraint.name],
-    ['Fix', constraint.fix],
+    ['Action Required', constraint.fix],
     [''],
-    ['CHANNEL METRICS'],
+    ['SCORE BREAKDOWN', 'Score', 'Max', 'Gap'],
+    ['CTR Signal', _ctrScore, 30, 30 - _ctrScore],
+    ['Impression Depth', _impScore, 25, 25 - _impScore],
+    ['Views Per Impression', _vpiScore, 25, 25 - _vpiScore],
+    ['Upload Velocity', _velScore, 20, 20 - _velScore],
+    ['TOTAL', totalScore, 100, 100 - totalScore],
+    [''],
+    ['CHANNEL METRICS', ''],
     ['Total Views', totalViews],
     ['Total Impressions', totalImpressions],
     ['Avg CTR', avgCTR.toFixed(2) + '%'],
-    ['VPI', vpi.toFixed(3)],
+    ['VPI (Views per Impression)', vpi.toFixed(3)],
     ['Videos Analyzed', vids.length],
   ];
   if (totalsMonths.length >= 2) {
@@ -675,7 +692,7 @@ function downloadXLSX() {
     summaryData.push(['Month-over-Month', pct + '%']);
   }
   const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
-  wsSummary['!cols'] = [{wch:30},{wch:50}];
+  wsSummary['!cols'] = [{wch:32},{wch:50},{wch:8},{wch:8}];
   XLSX.utils.book_append_sheet(wb, wsSummary, 'Summary');
 
   // Sheet 2: Video Breakdown
@@ -687,8 +704,8 @@ function downloadXLSX() {
     v.imps,
     parseFloat(v.ctr.toFixed(2)),
     parseFloat(v.vpiV.toFixed(3)),
-    v.retPct > 0 ? parseFloat(v.retPct.toFixed(1)) : '',
-    v.avgViewSec || '',
+    v.retPct > 0 ? parseFloat(v.retPct.toFixed(1)) : 'N/A',
+    v.avgViewSec > 0 ? v.avgViewSec : 'N/A',
     v.durSec || '',
     v.momentum === 'up' ? '↑ Growing' : v.momentum === 'down' ? '↓ Declining' : v.momentum === 'flat' ? '→ Holding' : 'New',
     v.status
