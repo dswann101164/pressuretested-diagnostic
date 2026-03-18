@@ -83,7 +83,7 @@ body{background:var(--navy-800);color:var(--text);font-family:var(--sans);font-s
 .score-denom{font-family:var(--display);font-size:1.5rem;color:var(--text3);}
 .score-label{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-top:3px;}
 
-/* CHANNEL PULSE (from Totals) */
+/* CHANNEL PULSE */
 .channel-pulse{background:rgba(240,165,0,0.06);border:1.5px solid rgba(240,165,0,0.6);border-left:4px solid var(--amber);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1rem;display:flex;align-items:center;gap:2rem;flex-wrap:wrap;}
 .pulse-label{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;}
 .pulse-stat:first-child .pulse-label{color:var(--amber);font-size:11px;letter-spacing:0.14em;font-weight:600;}
@@ -98,6 +98,20 @@ body{background:var(--navy-800);color:var(--text);font-family:var(--sans);font-s
 .kpi-card{background:var(--navy-700);border:1.5px solid rgba(255,255,255,0.35);border-radius:var(--radius);padding:1rem 1.25rem;}
 .kpi-val{font-family:var(--display);font-size:2rem;font-weight:700;color:var(--text);line-height:1;}
 .kpi-label{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-top:5px;}
+
+/* SCORE BREAKDOWN PANEL */
+.score-breakdown-panel{background:var(--navy-700);border:1.5px solid rgba(255,255,255,0.32);border-radius:8px;overflow:hidden;margin-bottom:1rem;}
+.score-breakdown-header{padding:.9rem 1.25rem;border-bottom:1px solid var(--border);background:var(--navy-900);display:flex;align-items:center;justify-content:space-between;}
+.score-breakdown-title{font-family:var(--display);font-size:13px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--amber);}
+.score-breakdown-total{font-family:var(--mono);font-size:11px;color:var(--text3);}
+.score-breakdown-row{display:flex;align-items:center;gap:1rem;padding:.75rem 1.25rem;border-bottom:1px solid var(--border);}
+.score-breakdown-row:last-child{border-bottom:none;}
+.score-breakdown-name{font-family:var(--sans);font-size:13px;color:var(--text2);min-width:175px;}
+.score-breakdown-bar-track{flex:1;background:rgba(255,255,255,0.06);border-radius:4px;height:7px;overflow:hidden;}
+.score-breakdown-bar-fill{height:100%;border-radius:4px;transition:width .5s ease;}
+.score-breakdown-score{font-family:var(--mono);font-size:13px;font-weight:600;min-width:48px;text-align:right;}
+.score-breakdown-denom{font-size:10px;color:var(--text3);font-weight:400;}
+.score-breakdown-gap{font-family:var(--mono);font-size:11px;color:var(--text3);min-width:52px;text-align:right;}
 
 .constraint-banner{background:rgba(224,82,82,0.12);border:1.5px solid rgba(224,82,82,0.6);border-left:4px solid var(--red);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:flex-start;gap:12px;}
 .spotlight-card{background:rgba(76,175,125,0.08);border:1.5px solid rgba(76,175,125,0.5);border-left:4px solid var(--green);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:flex-start;justify-content:space-between;gap:2rem;flex-wrap:wrap;}
@@ -210,41 +224,19 @@ footer{background:var(--navy-900);border-top:1px solid var(--border);padding:2re
   .upload-section,#results,.how-section{padding-left:1.25rem;padding-right:1.25rem;}
   .result-header{flex-direction:column;align-items:flex-start;}
   .score-display{text-align:left;}
+  .score-breakdown-name{min-width:130px;}
 }
 
-/* PRINT STYLES for report download */
 @media print{
   .site-header,.upload-section,.how-section,footer,.download-row,.repair-body{display:none!important;}
   #results{display:block!important;padding:0;}
   body{background:white;color:black;}
-  .result-header,.kpi-card,.repair-card,.video-table-wrap,.channel-pulse,.constraint-banner{background:white!important;border-color:#ccc!important;}
+  .result-header,.kpi-card,.repair-card,.video-table-wrap,.channel-pulse,.constraint-banner,.score-breakdown-panel{background:white!important;border-color:#ccc!important;}
   .kpi-val,.result-channel-name,.score-num{color:black!important;}
   .kpi-label,.result-channel-sub,.result-channel-label,.score-label{color:#666!important;}
   .repair-head{padding:.5rem!important;}
   .repair-card{break-inside:avoid;}
 }
-
-.spotlight-card{background:rgba(76,175,125,0.08);border:1.5px solid rgba(76,175,125,0.5);border-left:4px solid var(--green);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:flex-start;justify-content:space-between;gap:2rem;flex-wrap:wrap;}
-.spotlight-left{flex:1;min-width:200px;}
-.spotlight-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--green);margin-bottom:.4rem;font-weight:600;}
-.spotlight-title{font-size:15px;font-weight:700;color:#ffffff;margin-bottom:.5rem;line-height:1.4;}
-.spotlight-desc{font-size:13px;color:rgba(255,255,255,0.8);line-height:1.6;}
-.spotlight-stats{display:flex;gap:1.5rem;flex-shrink:0;align-items:center;}
-.spotlight-stat{text-align:center;}
-.spotlight-val{font-family:var(--mono);font-size:1.4rem;font-weight:700;color:#ffffff;}
-.spotlight-stat-label{font-family:var(--mono);font-size:10px;text-transform:uppercase;color:rgba(255,255,255,0.45);letter-spacing:0.08em;margin-top:2px;}
-
-
-.spotlight-card{background:rgba(76,175,125,0.08);border:1.5px solid rgba(76,175,125,0.5);border-left:4px solid var(--green);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:flex-start;justify-content:space-between;gap:2rem;flex-wrap:wrap;}
-.spotlight-left{flex:1;min-width:200px;}
-.spotlight-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--green);margin-bottom:.4rem;font-weight:600;}
-.spotlight-title{font-size:15px;font-weight:700;color:#ffffff;margin-bottom:.5rem;line-height:1.4;}
-.spotlight-desc{font-size:13px;color:rgba(255,255,255,0.8);line-height:1.6;}
-.spotlight-stats{display:flex;gap:1.5rem;flex-shrink:0;align-items:center;}
-.spotlight-stat{text-align:center;}
-.spotlight-val{font-family:var(--mono);font-size:1.4rem;font-weight:700;color:#ffffff;}
-.spotlight-stat-label{font-family:var(--mono);font-size:10px;text-transform:uppercase;color:rgba(255,255,255,0.45);letter-spacing:0.08em;margin-top:2px;}
-
 </style>
 </head>
 <body>
@@ -277,7 +269,7 @@ footer{background:var(--navy-900);border-top:1px solid var(--border);padding:2re
     </div>
     <div class="drop-title">Drop your YouTube Studio export here</div>
     <div class="drop-sub">Runs entirely in your browser — nothing is uploaded to any server</div>
-    <button class="drop-btn" onclick="document.getElementById(&#39;fileInput&#39;).click()">Choose File</button>
+    <button class="drop-btn" onclick="document.getElementById('fileInput').click()">Choose File</button>
     <input type="file" id="fileInput" accept=".csv,.zip">
     <div class="drop-formats">
       <span class="format-badge primary">ZIP export ★ recommended</span>
@@ -367,7 +359,7 @@ function parseDuration(str) {
   return Number(str) || 0;
 }
 
-// ── FILE HANDLER — ZIP or CSV ──
+// ── FILE HANDLER ──
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
 
@@ -423,17 +415,15 @@ async function handleZip(file) {
 function scoreChannel(tableRows, chartRows, totalsRows) {
   const vids = tableRows.filter(v => v['Video title'] && v['Video title'].length > 0 && v['Content'] !== '');
 
-  // Build momentum map from Chart data (keyed by Content ID)
   const momentumMap = {};
   chartRows.forEach(r => {
     const id = r['Content'] || r['Video ID'] || '';
     if (!id) return;
     if (!momentumMap[id]) momentumMap[id] = {};
-    const month = (r['Date'] || '').substring(0, 7); // "2026-02"
+    const month = (r['Date'] || '').substring(0, 7);
     momentumMap[id][month] = (momentumMap[id][month] || 0) + (Number(r['Views']) || 0);
   });
 
-  // Channel pulse from Totals
   let totalsMonths = [];
   totalsRows.forEach(r => {
     if (r['Date'] && r['Views'] !== undefined) {
@@ -455,7 +445,6 @@ function scoreChannel(tableRows, chartRows, totalsRows) {
     const avgViewSec = parseDuration(v['Average view duration'] || '');
     const watchHours = parseFloat(v['Watch time (hours)'] || 0);
     const durSec = Number(v['Duration']) || 0;
-    // Use average view duration if available, otherwise calc from watch time
     const retPct = durSec > 0 && avgViewSec > 0
       ? (avgViewSec / durSec) * 100
       : (durSec > 0 && watchHours > 0 && (Number(v['Views']) || 0) > 0)
@@ -463,10 +452,9 @@ function scoreChannel(tableRows, chartRows, totalsRows) {
         : 0;
     const vpiV = imps > 0 ? views / imps : 0;
 
-    // Momentum from Chart data
     const vid_id = v['Content'] || '';
     const mData = momentumMap[vid_id] || null;
-    let momentum = 'new'; // default if no chart data
+    let momentum = 'new';
     let momFeb = 0, momMar = 0;
     if (mData) {
       const months = Object.keys(mData).sort();
@@ -481,7 +469,6 @@ function scoreChannel(tableRows, chartRows, totalsRows) {
       }
     }
 
-    // Status
     let status, statusClass, priorityNum;
     if (vpiV >= 0.4) { status = 'Performing'; statusClass = 'pill-green'; priorityNum = 4; }
     else if (imps > 200 && ctr < 2.5) { status = 'Repackage'; statusClass = 'pill-red'; priorityNum = 1; }
@@ -495,7 +482,7 @@ function scoreChannel(tableRows, chartRows, totalsRows) {
   });
   enriched.sort((a, b) => a.priorityNum - b.priorityNum);
 
-  // Scoring
+  // Scoring — component scores exposed for breakdown panel
   let ctrScore = avgCTR < 2 ? 5 : avgCTR < 3 ? 10 : avgCTR < 4 ? 15 : avgCTR < 5 ? 20 : avgCTR < 8 ? 26 : 30;
   const impsPerVid = vids.length > 0 ? totalImpressions / vids.length : 0;
   let impScore = impsPerVid < 50 ? 5 : impsPerVid < 100 ? 10 : impsPerVid < 200 ? 16 : impsPerVid < 400 ? 20 : 25;
@@ -511,21 +498,29 @@ function scoreChannel(tableRows, chartRows, totalsRows) {
   ];
   scores.sort((a, b) => (a.score / a.max) - (b.score / b.max));
 
-  const result = { vids: enriched, totalViews, totalImpressions, avgCTR, vpi,
-           totalScore, constraint: scores[0], totalsMonths, hasMomentum: Object.keys(momentumMap).length > 0 };
+  const result = {
+    vids: enriched, totalViews, totalImpressions, avgCTR, vpi,
+    totalScore, ctrScore, impScore, vpiScore, velScore,
+    constraint: scores[0], totalsMonths, hasMomentum: Object.keys(momentumMap).length > 0
+  };
   window._lastData = result;
   return result;
 }
 
 // ── RENDER ──
 function renderResults(data) {
-  const { vids, totalViews, totalImpressions, avgCTR, vpi, totalScore, constraint, totalsMonths, hasMomentum } = data;
+  const { vids, totalViews, totalImpressions, avgCTR, vpi,
+          totalScore, ctrScore, impScore, vpiScore, velScore,
+          constraint, totalsMonths, hasMomentum } = data;
+
   const scoreColor = totalScore < 30 ? 'score-danger' : totalScore < 50 ? 'score-warning' : totalScore < 70 ? 'score-ok' : 'score-good';
   const logoSrc = document.querySelector('.logo img').src;
+
   const _qualVids = vids.filter(v => v.imps >= 50);
   const _bestVid = _qualVids.length > 0
     ? [..._qualVids].sort((a, b) => b.ctr - a.ctr)[0]
     : [...vids].sort((a, b) => b.views - a.views)[0];
+
   const spotlightHTML = _bestVid ? `
     <div class="spotlight-card">
       <div class="spotlight-left">
@@ -540,9 +535,7 @@ function renderResults(data) {
       </div>
     </div>` : '';
 
-
-
-  // Channel pulse HTML
+  // Channel pulse
   let pulseHTML = '';
   if (totalsMonths.length >= 2) {
     const prev = totalsMonths[totalsMonths.length - 2];
@@ -571,10 +564,38 @@ function renderResults(data) {
       </div>`;
   }
 
-  // Momentum column header
+  // Score breakdown panel
+  const breakdownRows = [
+    { name: 'CTR Signal',           score: ctrScore, max: 30 },
+    { name: 'Impression Depth',     score: impScore, max: 25 },
+    { name: 'Views Per Impression', score: vpiScore, max: 25 },
+    { name: 'Upload Velocity',      score: velScore, max: 20 },
+  ].map(r => {
+    const pct = (r.score / r.max) * 100;
+    const ratio = r.score / r.max;
+    const col = ratio >= 0.7 ? 'var(--green)' : ratio >= 0.45 ? 'var(--amber)' : 'var(--red)';
+    const gap = r.max - r.score;
+    return `<div class="score-breakdown-row">
+      <div class="score-breakdown-name">${r.name}</div>
+      <div class="score-breakdown-bar-track">
+        <div class="score-breakdown-bar-fill" style="width:${pct}%;background:${col};"></div>
+      </div>
+      <div class="score-breakdown-score" style="color:${col};">${r.score}<span class="score-breakdown-denom">/${r.max}</span></div>
+      <div class="score-breakdown-gap">gap ${gap}</div>
+    </div>`;
+  }).join('');
+
+  const scoreBreakdownHTML = `
+    <div class="score-breakdown-panel">
+      <div class="score-breakdown-header">
+        <span class="score-breakdown-title">Score Breakdown</span>
+        <span class="score-breakdown-total">${totalScore} / 100 total</span>
+      </div>
+      ${breakdownRows}
+    </div>`;
+
   const momHeader = hasMomentum ? '<th>Momentum</th>' : '';
 
-  // Table rows
   const tableRows = vids.map(v => {
     let momCell = '';
     if (hasMomentum) {
@@ -621,6 +642,8 @@ function renderResults(data) {
       <div class="kpi-card"><div class="kpi-val">${vids.length}</div><div class="kpi-label">Videos</div></div>
     </div>
 
+    ${scoreBreakdownHTML}
+
     <div class="constraint-banner">
       <div class="constraint-dot"></div>
       <div>
@@ -631,10 +654,6 @@ function renderResults(data) {
     </div>
 
     ${spotlightHTML}
-
-    
-
-    
 
     <p class="queue-label">Repair queue — in priority order</p>
     <div class="repair-cards">${buildRepairCards(vids, data)}</div>
@@ -707,19 +726,10 @@ document.addEventListener('click', () => closeDlMenu());
 // ── DOWNLOAD XLSX ──
 function downloadXLSX() {
   if (!window._lastData) return;
-  const { vids, totalViews, totalImpressions, avgCTR, vpi, totalScore, constraint, totalsMonths } = window._lastData;
+  const { vids, totalViews, totalImpressions, avgCTR, vpi, totalScore,
+          ctrScore, impScore, vpiScore, velScore, constraint, totalsMonths } = window._lastData;
 
   const wb = XLSX.utils.book_new();
-
-  // Sheet 1: Summary
-  // Recalculate component scores for breakdown
-  const _avgCTR = avgCTR;
-  const _impsPerVid = vids.length > 0 ? totalImpressions / vids.length : 0;
-  const _vpi = vpi;
-  const _ctrScore = _avgCTR < 2 ? 5 : _avgCTR < 3 ? 10 : _avgCTR < 4 ? 15 : _avgCTR < 5 ? 20 : _avgCTR < 8 ? 26 : 30;
-  const _impScore = _impsPerVid < 50 ? 5 : _impsPerVid < 100 ? 10 : _impsPerVid < 200 ? 16 : _impsPerVid < 400 ? 20 : 25;
-  const _vpiScore = _vpi < 0.1 ? 5 : _vpi < 0.2 ? 10 : _vpi < 0.35 ? 16 : _vpi < 0.5 ? 20 : 25;
-  const _velScore = vids.length < 3 ? 5 : vids.length < 6 ? 10 : vids.length < 10 ? 15 : 20;
 
   const summaryData = [
     ['Pressure Tested — Signal Diagnostic Report'],
@@ -731,10 +741,10 @@ function downloadXLSX() {
     ['Action Required', constraint.fix],
     [''],
     ['SCORE BREAKDOWN', 'Score', 'Max', 'Gap'],
-    ['CTR Signal', _ctrScore, 30, 30 - _ctrScore],
-    ['Impression Depth', _impScore, 25, 25 - _impScore],
-    ['Views Per Impression', _vpiScore, 25, 25 - _vpiScore],
-    ['Upload Velocity', _velScore, 20, 20 - _velScore],
+    ['CTR Signal', ctrScore, 30, 30 - ctrScore],
+    ['Impression Depth', impScore, 25, 25 - impScore],
+    ['Views Per Impression', vpiScore, 25, 25 - vpiScore],
+    ['Upload Velocity', velScore, 20, 20 - velScore],
     ['TOTAL', totalScore, 100, 100 - totalScore],
     [''],
     ['CHANNEL METRICS', ''],
@@ -758,7 +768,6 @@ function downloadXLSX() {
   wsSummary['!cols'] = [{wch:32},{wch:50},{wch:8},{wch:8}];
   XLSX.utils.book_append_sheet(wb, wsSummary, 'Summary');
 
-  // Sheet 2: Video Breakdown
   const headers = ['Video Title', 'Published', 'Views', 'Impressions', 'CTR %', 'VPI', 'Retention %', 'Avg View Duration (s)', 'Duration (s)', 'Momentum', 'Status'];
   const videoData = [headers, ...vids.map(v => [
     v['Video title'] || '',
@@ -777,7 +786,6 @@ function downloadXLSX() {
   wsVideos['!cols'] = [{wch:50},{wch:14},{wch:8},{wch:12},{wch:8},{wch:8},{wch:12},{wch:18},{wch:12},{wch:12},{wch:14}];
   XLSX.utils.book_append_sheet(wb, wsVideos, 'Video Breakdown');
 
-  // Sheet 3: Repair Queue
   const repairHeaders = ['Priority', 'Signal Layer', 'Video / Issue', 'Metric', 'Repair Action'];
   const repairData = [repairHeaders];
   const worstCTR = vids.filter(v => v.imps > 100).sort((a,b) => a.ctr - b.ctr)[0];
@@ -821,128 +829,25 @@ function downloadCSV() {
   URL.revokeObjectURL(url);
 }
 
-// ── DOWNLOAD PDF (print) ──
-function downloadPDF() {
-  window.print();
-}
+// ── DOWNLOAD PDF ──
+function downloadPDF() { window.print(); }
 
-// ── DOWNLOAD HTML REPORT ──
-function downloadReport(score) {
+// ── DOWNLOAD HTML ──
+function downloadHTML() {
+  if (!window._lastData) return;
   const content = document.getElementById('results').innerHTML;
   const logoSrc = document.querySelector('.logo img').src;
-  const html = `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Pressure Tested — Signal Report</title>
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Pressure Tested — Signal Report</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<style>
-:root{--navy-900:#0a0f1e;--navy-800:#0f1628;--navy-700:#162035;--navy-600:#1a2744;--border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.15);--amber:#f0a500;--amber-bg:rgba(240,165,0,0.1);--amber-border:rgba(240,165,0,0.3);--red:#e05252;--red-bg:rgba(224,82,82,0.1);--red-border:rgba(224,82,82,0.3);--yellow:#e8c840;--yellow-bg:rgba(232,200,64,0.1);--yellow-border:rgba(232,200,64,0.3);--green:#4caf7d;--green-bg:rgba(76,175,125,0.1);--green-border:rgba(76,175,125,0.3);--text:#ffffff;--text2:rgba(255,255,255,0.65);--text3:rgba(255,255,255,0.35);--mono:"IBM Plex Mono",monospace;--sans:"IBM Plex Sans",sans-serif;--display:"Barlow Condensed",sans-serif;--radius:6px;}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--navy-800);color:var(--text);font-family:var(--sans);font-size:14px;padding:2rem;max-width:960px;margin:0 auto;}
-.report-header{background:var(--navy-900);border-bottom:3px solid var(--amber);padding:1.5rem 2rem;display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;border-radius:8px;}
-.report-logo{display:flex;align-items:center;gap:12px;}
-.report-logo img{width:44px;height:44px;border-radius:50%;border:2px solid var(--amber);}
-.report-logo-text{font-family:var(--display);font-size:1.5rem;font-weight:700;color:var(--text);}
-.report-logo-text em{color:var(--amber);font-style:normal;}
-.report-meta{text-align:right;font-family:var(--mono);font-size:11px;color:var(--text3);}
-.result-header{background:var(--navy-900);border:1.5px solid rgba(255,255,255,0.35);border-top:3px solid var(--amber);border-radius:8px;padding:1.5rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
-.result-channel{display:flex;align-items:center;gap:14px;}
-.result-avatar{width:48px;height:48px;border-radius:50%;border:2px solid var(--amber);}
-.result-channel-label{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:3px;}
-.result-channel-name{font-family:var(--display);font-size:1.4rem;font-weight:700;text-transform:uppercase;}
-.result-channel-sub{font-family:var(--mono);font-size:11px;color:var(--text3);}
-.score-display{text-align:right;}
-.score-num{font-family:var(--display);font-size:3rem;font-weight:800;line-height:1;}
-.score-denom{font-family:var(--display);font-size:1.3rem;color:var(--text3);}
-.score-label{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;}
-.channel-pulse{background:var(--navy-700);border:1px solid var(--amber-border);border-left:4px solid var(--amber);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1rem;display:flex;gap:2rem;flex-wrap:wrap;}
-.pulse-label{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:4px;}
-.pulse-val{font-family:var(--display);font-size:1.6rem;font-weight:700;}
-.pulse-trend{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:4px;margin-top:4px;}
-.trend-up{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
-.trend-down{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);}
-.trend-flat{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border);}
-.kpi-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:.75rem;margin-bottom:1rem;}
-.kpi-card{background:var(--navy-700);border:1px solid var(--border);border-radius:var(--radius);padding:.85rem 1rem;}
-.kpi-val{font-family:var(--display);font-size:1.6rem;font-weight:700;}
-.kpi-label{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;margin-top:4px;}
-.constraint-banner{background:var(--red-bg);border:1px solid var(--red-border);border-left:4px solid var(--red);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1.5rem;}
-.constraint-eyebrow{font-family:var(--mono);font-size:10px;color:var(--red);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:3px;}
-.constraint-title{font-family:var(--display);font-size:1.1rem;font-weight:600;text-transform:uppercase;color:var(--text);margin-bottom:3px;}
-.constraint-desc{font-size:13px;color:var(--text2);}
-.queue-label{font-family:var(--display);font-size:13px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--amber);margin-bottom:.75rem;border-left:3px solid var(--amber);padding-left:12px;}
-.repair-cards{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.5rem;}
-.repair-card{background:var(--navy-700);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
-.repair-head{display:flex;align-items:center;gap:12px;padding:.85rem 1.25rem;}
-.p-badge{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:500;flex-shrink:0;}
-.p1{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);}
-.p2{background:var(--yellow-bg);color:var(--yellow);border:1px solid var(--yellow-border);}
-.p3{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border);}
-.p4{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
-.repair-meta{flex:1;}
-.repair-signal{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:2px;}
-.repair-title{font-size:13px;font-weight:500;color:var(--text);}
-.repair-stat{font-family:var(--mono);font-size:11px;padding:3px 8px;border-radius:4px;}
-.stat-red{background:var(--red-bg);color:var(--red);}
-.stat-yellow{background:var(--yellow-bg);color:var(--yellow);}
-.stat-amber{background:var(--amber-bg);color:var(--amber);}
-.stat-green{background:var(--green-bg);color:var(--green);}
-.repair-body{padding:.75rem 1.25rem 1rem;border-top:1px solid var(--border);}
-.body-label{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:5px;}
-.body-text{font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:.75rem;}
-.chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:.75rem;}
-.chip{font-size:11px;padding:3px 8px;border-radius:4px;background:var(--navy-600);border:1px solid var(--border);color:var(--text2);font-family:var(--mono);}
-.chip.bad{background:var(--red-bg);border-color:var(--red-border);color:var(--red);}
-.chip.good{background:var(--green-bg);border-color:var(--green-border);color:var(--green);}
-.action-box{background:var(--navy-600);border-left:3px solid var(--amber);padding:.75rem 1rem;display:flex;gap:10px;border-radius:0 var(--radius) var(--radius) 0;}
-.action-arrow{color:var(--amber);font-size:13px;flex-shrink:0;}
-.action-text{font-size:13px;color:var(--text);line-height:1.5;}
-.action-text strong{color:var(--amber);font-weight:500;}
-.video-table-wrap{background:var(--navy-700);border:1.5px solid rgba(255,255,255,0.32);border-radius:8px;overflow:hidden;margin-bottom:1.5rem;}
-.vt-header{padding:.85rem 1.25rem;border-bottom:1px solid var(--border);background:var(--navy-900);}
-.vt-title{font-family:var(--display);font-size:13px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--amber);}
-table{width:100%;border-collapse:collapse;font-size:12px;}
-th{text-align:left;padding:.6rem 1.25rem;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);border-bottom:1px solid var(--border);background:var(--navy-800);}
-td{padding:.65rem 1.25rem;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:middle;}
-tr:last-child td{border-bottom:none;}
-.mono{font-family:var(--mono);font-size:11px;}
-.title-cell{color:var(--text);}
-.status-pill{display:inline-block;font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:4px;font-weight:500;white-space:nowrap;}
-.pill-red{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);}
-.pill-yellow{background:var(--yellow-bg);color:var(--yellow);border:1px solid var(--yellow-border);}
-.pill-amber{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border);}
-.pill-green{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
-.momentum{font-size:14px;font-weight:bold;}
-.mom-up{color:var(--green);}
-.mom-down{color:var(--red);}
-.mom-flat{color:var(--amber);}
-.mom-new{color:var(--text3);font-size:11px;font-family:var(--mono);}
-.score-danger{color:var(--red);}
-.score-warning{color:var(--yellow);}
-.score-ok{color:var(--amber);}
-.score-good{color:var(--green);}
-.download-row,.chevron{display:none!important;}
-.repair-body{display:block!important;}
-.report-footer{margin-top:2rem;padding-top:1rem;border-top:1px solid var(--border);text-align:center;font-family:var(--mono);font-size:11px;color:var(--text3);}
-</style>
-</head>
-<body>
-<div class="report-header">
-  <div class="report-logo">
-    <img src="${logoSrc}" alt="Pressure Tested">
-    <span class="report-logo-text">Pressure<em>Tested</em></span>
-  </div>
-  <div class="report-meta">
-    Signal Diagnostic Report<br>
-    Generated ${new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}<br>
-    pressuretested.co
-  </div>
+<style>:root{--navy-900:#0a0f1e;--navy-800:#0f1628;--navy-700:#162035;--navy-600:#1a2744;--border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.15);--amber:#f0a500;--amber-bg:rgba(240,165,0,0.1);--amber-border:rgba(240,165,0,0.3);--red:#e05252;--red-bg:rgba(224,82,82,0.1);--red-border:rgba(224,82,82,0.3);--yellow:#e8c840;--yellow-bg:rgba(232,200,64,0.1);--yellow-border:rgba(232,200,64,0.3);--green:#4caf7d;--green-bg:rgba(76,175,125,0.1);--green-border:rgba(76,175,125,0.3);--text:#ffffff;--text2:rgba(255,255,255,0.65);--text3:rgba(255,255,255,0.35);--mono:"IBM Plex Mono",monospace;--sans:"IBM Plex Sans",sans-serif;--display:"Barlow Condensed",sans-serif;--radius:6px;}*{box-sizing:border-box;margin:0;padding:0;}body{background:var(--navy-800);color:var(--text);font-family:var(--sans);font-size:14px;padding:2rem;max-width:960px;margin:0 auto;}.result-header{background:var(--navy-900);border:1.5px solid rgba(255,255,255,0.35);border-top:3px solid var(--amber);border-radius:8px;padding:1.5rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;}.result-channel{display:flex;align-items:center;gap:14px;}.result-avatar{width:48px;height:48px;border-radius:50%;border:2px solid var(--amber);}.result-channel-label{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:3px;}.result-channel-name{font-family:var(--display);font-size:1.4rem;font-weight:700;text-transform:uppercase;}.result-channel-sub{font-family:var(--mono);font-size:11px;color:var(--text3);}.score-display{text-align:right;}.score-num{font-family:var(--display);font-size:3rem;font-weight:800;line-height:1;}.score-denom{font-family:var(--display);font-size:1.3rem;color:var(--text3);}.score-label{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;}.channel-pulse{background:rgba(240,165,0,0.06);border:1px solid var(--amber-border);border-left:4px solid var(--amber);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1rem;display:flex;gap:2rem;flex-wrap:wrap;}.pulse-label{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:4px;}.pulse-val{font-family:var(--display);font-size:1.6rem;font-weight:700;}.pulse-trend{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:4px;margin-top:4px;}.trend-up{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}.trend-down{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);}.trend-flat{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border);}.kpi-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:.75rem;margin-bottom:1rem;}.kpi-card{background:var(--navy-700);border:1px solid var(--border);border-radius:var(--radius);padding:.85rem 1rem;}.kpi-val{font-family:var(--display);font-size:1.6rem;font-weight:700;}.kpi-label{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;margin-top:4px;}.score-breakdown-panel{background:var(--navy-700);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:1rem;}.score-breakdown-header{padding:.9rem 1.25rem;border-bottom:1px solid var(--border);background:var(--navy-900);display:flex;align-items:center;justify-content:space-between;}.score-breakdown-title{font-family:var(--display);font-size:13px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--amber);}.score-breakdown-total{font-family:var(--mono);font-size:11px;color:var(--text3);}.score-breakdown-row{display:flex;align-items:center;gap:1rem;padding:.75rem 1.25rem;border-bottom:1px solid var(--border);}.score-breakdown-row:last-child{border-bottom:none;}.score-breakdown-name{font-family:var(--sans);font-size:13px;color:var(--text2);min-width:175px;}.score-breakdown-bar-track{flex:1;background:rgba(255,255,255,0.06);border-radius:4px;height:7px;overflow:hidden;}.score-breakdown-bar-fill{height:100%;border-radius:4px;}.score-breakdown-score{font-family:var(--mono);font-size:13px;font-weight:600;min-width:48px;text-align:right;}.score-breakdown-denom{font-size:10px;color:var(--text3);font-weight:400;}.score-breakdown-gap{font-family:var(--mono);font-size:11px;color:var(--text3);min-width:52px;text-align:right;}.constraint-banner{background:var(--red-bg);border:1px solid var(--red-border);border-left:4px solid var(--red);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1.5rem;}.constraint-eyebrow{font-family:var(--mono);font-size:10px;color:var(--red);text-transform:uppercase;margin-bottom:3px;}.constraint-title{font-family:var(--display);font-size:1.1rem;font-weight:600;text-transform:uppercase;color:var(--text);margin-bottom:3px;}.constraint-desc{font-size:13px;color:var(--text2);}.queue-label{font-family:var(--display);font-size:13px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--amber);margin-bottom:.75rem;border-left:3px solid var(--amber);padding-left:12px;}.repair-cards{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.5rem;}.repair-card{background:var(--navy-700);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}.repair-head{display:flex;align-items:center;gap:12px;padding:.85rem 1.25rem;}.p-badge{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:500;flex-shrink:0;}.p1{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);}.p2{background:var(--yellow-bg);color:var(--yellow);border:1px solid var(--yellow-border);}.p3{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border);}.p4{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}.repair-meta{flex:1;}.repair-signal{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:2px;}.repair-title{font-size:13px;font-weight:500;color:var(--text);}.repair-stat{font-family:var(--mono);font-size:11px;padding:3px 8px;border-radius:4px;}.stat-red{background:var(--red-bg);color:var(--red);}.stat-yellow{background:var(--yellow-bg);color:var(--yellow);}.stat-amber{background:var(--amber-bg);color:var(--amber);}.stat-green{background:var(--green-bg);color:var(--green);}.repair-body{padding:.75rem 1.25rem 1rem;border-top:1px solid var(--border);display:block!important;}.body-label{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:5px;}.body-text{font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:.75rem;}.chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:.75rem;}.chip{font-size:11px;padding:3px 8px;border-radius:4px;background:var(--navy-600);border:1px solid var(--border);color:var(--text2);font-family:var(--mono);}.chip.bad{background:var(--red-bg);border-color:var(--red-border);color:var(--red);}.chip.good{background:var(--green-bg);border-color:var(--green-border);color:var(--green);}.action-box{background:var(--navy-600);border-left:3px solid var(--amber);padding:.75rem 1rem;display:flex;gap:10px;border-radius:0 var(--radius) var(--radius) 0;}.action-arrow{color:var(--amber);font-size:13px;flex-shrink:0;}.action-text{font-size:13px;color:var(--text);line-height:1.5;}.action-text strong{color:var(--amber);font-weight:500;}.video-table-wrap{background:var(--navy-700);border:1.5px solid rgba(255,255,255,0.32);border-radius:8px;overflow:hidden;margin-bottom:1.5rem;}.vt-header{padding:.85rem 1.25rem;border-bottom:1px solid var(--border);background:var(--navy-900);}.vt-title{font-family:var(--display);font-size:13px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--amber);}table{width:100%;border-collapse:collapse;font-size:12px;}th{text-align:left;padding:.6rem 1.25rem;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);border-bottom:1px solid var(--border);background:var(--navy-800);}td{padding:.65rem 1.25rem;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:middle;}tr:last-child td{border-bottom:none;}.mono{font-family:var(--mono);font-size:11px;}.title-cell{color:var(--text);}.status-pill{display:inline-block;font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:4px;font-weight:500;white-space:nowrap;}.pill-red{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);}.pill-yellow{background:var(--yellow-bg);color:var(--yellow);border:1px solid var(--yellow-border);}.pill-amber{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border);}.pill-green{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}.momentum{font-size:14px;font-weight:bold;}.mom-up{color:var(--green);}.mom-down{color:var(--red);}.mom-flat{color:var(--amber);}.mom-new{color:var(--text3);font-size:11px;font-family:var(--mono);}.score-danger{color:var(--red);}.score-warning{color:var(--yellow);}.score-ok{color:var(--amber);}.score-good{color:var(--green);}.download-row,.chevron{display:none!important;}.spotlight-card{background:rgba(76,175,125,0.08);border:1.5px solid rgba(76,175,125,0.5);border-left:4px solid var(--green);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:flex-start;justify-content:space-between;gap:2rem;flex-wrap:wrap;}.spotlight-left{flex:1;min-width:200px;}.spotlight-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--green);margin-bottom:.4rem;font-weight:600;}.spotlight-title{font-size:15px;font-weight:700;color:#ffffff;margin-bottom:.5rem;line-height:1.4;}.spotlight-desc{font-size:13px;color:rgba(255,255,255,0.8);line-height:1.6;}.spotlight-stats{display:flex;gap:1.5rem;flex-shrink:0;align-items:center;}.spotlight-stat{text-align:center;}.spotlight-val{font-family:var(--mono);font-size:1.4rem;font-weight:700;color:#ffffff;}.spotlight-stat-label{font-family:var(--mono);font-size:10px;text-transform:uppercase;color:rgba(255,255,255,0.45);letter-spacing:0.08em;margin-top:2px;}.report-footer{margin-top:2rem;padding-top:1rem;border-top:1px solid var(--border);text-align:center;font-family:var(--mono);font-size:11px;color:var(--text3);}</style>
+</head><body>
+<div style="background:var(--navy-900);border-bottom:3px solid var(--amber);padding:1.5rem 2rem;display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;border-radius:8px;">
+  <div style="display:flex;align-items:center;gap:12px;"><img src="${logoSrc}" style="width:44px;height:44px;border-radius:50%;border:2px solid var(--amber);"><span style="font-family:'Barlow Condensed',sans-serif;font-size:1.5rem;font-weight:700;color:#fff;">Pressure<em style="color:#f0a500;font-style:normal;">Tested</em></span></div>
+  <div style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(255,255,255,0.35);">Signal Diagnostic Report<br>Generated ${new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}<br>pressuretested.co</div>
 </div>
 ${content}
 <div class="report-footer">Pressure Tested Signal Diagnostic · pressuretested.co · youtube.com/@pressure-tester</div>
-</body>
-</html>`;
+</body></html>`;
   const blob = new Blob([html], { type: 'text/html' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -967,7 +872,7 @@ function buildRepairCards(vids, data) {
 
   if (dyingVids.length > 0) cards.push(`<div class="repair-card"><div class="repair-head"><div class="p-badge p2">2b</div><div class="repair-meta"><div class="repair-signal">Momentum / Declining videos</div><div class="repair-title">${dyingVids.length} video${dyingVids.length>1?'s':''} losing views month-over-month</div></div><div class="repair-stat stat-red">↓ Declining</div><div class="chevron">▾</div></div><div class="repair-body"><div class="body-section"><div class="body-label">Which videos</div><div class="chips">${dyingVids.map(v=>`<span class="chip bad">${esc(truncate(v['Video title'],38))} (${v.momFeb}→${v.momMar})</span>`).join('')}</div></div><div class="action-box"><div class="action-arrow">→</div><div class="action-text"><strong>Repair:</strong> Add end screen cards pointing from these videos to your current top performer. A decaying video can still feed your channel's best signal.</div></div></div></div>`);
 
-  if (hiddenGem) cards.push(`<div class="repair-card"><div class="repair-head"><div class="p-badge p3">3</div><div class="repair-meta"><div class="repair-signal">Distribution / Hidden opportunity</div><div class="repair-title">${esc(truncate(hiddenGem['Video title'],55))}</div></div><div class="repair-stat stat-amber">${hiddenGem.ctr.toFixed(1)}% CTR, ${hiddenGem.imps} imps</div><div class="chevron">▾</div></div><div class="repair-body"><div class="body-section"><div class="body-label">Why it matters</div><div class="body-text">Strong CTR (${hiddenGem.ctr.toFixed(1)}%) but only ${hiddenGem.imps} impressions. YouTube hasn't committed to distributing it yet. A signal boost in the first 48 hours can trigger broader testing.</div></div><div class="action-box"><div class="action-arrow">→</div><div class="action-text"><strong>Repair:</strong> Add an end screen from your top performer pointing here. Post a Community tab update with a direct link. Early external traffic with strong CTR tells YouTube to keep testing.</div></div></div></div>`);
+  if (hiddenGem) cards.push(`<div class="repair-card"><div class="repair-head"><div class="p-badge p3">3</div><div class="repair-meta"><div class="repair-signal">Distribution / Hidden opportunity</div><div class="repair-title">${esc(truncate(hiddenGem['Video title'],55))}</div></div><div class="repair-stat stat-amber">${hiddenGem.ctr.toFixed(1)}% CTR, ${hiddenGem.imps} imps</div><div class="chevron">▾</div></div><div class="repair-body"><div class="body-section"><div class="body-label">Why it matters</div><div class="body-text">Strong CTR (${hiddenGem.ctr.toFixed(1)}%) but only ${hiddenGem.imps} impressions. YouTube hasn't committed to distributing it yet.</div></div><div class="action-box"><div class="action-arrow">→</div><div class="action-text"><strong>Repair:</strong> Add an end screen from your top performer pointing here. Post a Community tab update with a direct link.</div></div></div></div>`);
 
   cards.push(`<div class="repair-card"><div class="repair-head"><div class="p-badge p4">4</div><div class="repair-meta"><div class="repair-signal">Upload velocity / Cadence</div><div class="repair-title">Maintain consistent upload rhythm</div></div><div class="repair-stat stat-green">Monitor</div><div class="chevron">▾</div></div><div class="repair-body"><div class="body-section"><div class="body-label">Why it matters</div><div class="body-text">The algorithm learns faster with a consistent data stream. Upload gaps reset momentum. Fix topic clarity first — consistent uploads of mixed-audience content makes channel identity confusion worse.</div></div><div class="action-box"><div class="action-arrow">→</div><div class="action-text"><strong>Target:</strong> 2 uploads per week, no gap longer than 5 days. Focused, consistent content on one audience problem accelerates algorithm classification.</div></div></div></div>`);
 
