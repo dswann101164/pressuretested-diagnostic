@@ -564,36 +564,6 @@ function renderResults(data) {
       </div>`;
   }
 
-  // Score breakdown panel
-  const breakdownRows = [
-    { name: 'CTR Signal',           score: ctrScore, max: 30 },
-    { name: 'Impression Depth',     score: impScore, max: 25 },
-    { name: 'Views Per Impression', score: vpiScore, max: 25 },
-    { name: 'Upload Velocity',      score: velScore, max: 20 },
-  ].map(r => {
-    const pct = (r.score / r.max) * 100;
-    const ratio = r.score / r.max;
-    const col = ratio >= 0.7 ? 'var(--green)' : ratio >= 0.45 ? 'var(--amber)' : 'var(--red)';
-    const gap = r.max - r.score;
-    return `<div class="score-breakdown-row">
-      <div class="score-breakdown-name">${r.name}</div>
-      <div class="score-breakdown-bar-track">
-        <div class="score-breakdown-bar-fill" style="width:${pct}%;background:${col};"></div>
-      </div>
-      <div class="score-breakdown-score" style="color:${col};">${r.score}<span class="score-breakdown-denom">/${r.max}</span></div>
-      <div class="score-breakdown-gap">gap ${gap}</div>
-    </div>`;
-  }).join('');
-
-  const scoreBreakdownHTML = `
-    <div class="score-breakdown-panel">
-      <div class="score-breakdown-header">
-        <span class="score-breakdown-title">Score Breakdown</span>
-        <span class="score-breakdown-total">${totalScore} / 100 total</span>
-      </div>
-      ${breakdownRows}
-    </div>`;
-
   const momHeader = hasMomentum ? '<th>Momentum</th>' : '';
 
   const tableRows = vids.map(v => {
@@ -619,7 +589,7 @@ function renderResults(data) {
   document.getElementById('results').innerHTML = `
     <div class="result-header">
       <div class="result-channel">
-        <img src="${logoSrc}" alt="Pressure Tested" class="result-avatar">
+        <img id="resultAvatar" src="" alt="Pressure Tested" class="result-avatar">
         <div>
           <div class="result-channel-label">Diagnostic complete</div>
           <div class="result-channel-name">Pressure Tested</div>
@@ -641,8 +611,6 @@ function renderResults(data) {
       <div class="kpi-card"><div class="kpi-val">${vpi.toFixed(3)}</div><div class="kpi-label">VPI</div></div>
       <div class="kpi-card"><div class="kpi-val">${vids.length}</div><div class="kpi-label">Videos</div></div>
     </div>
-
-    ${scoreBreakdownHTML}
 
     <div class="constraint-banner">
       <div class="constraint-dot"></div>
@@ -700,6 +668,35 @@ function renderResults(data) {
       </div>
       <button class="reset-btn" onclick="resetTool()">← Analyze a different channel</button>
     </div>`;
+
+  // Inject avatar separately — avoids 167k base64 string inside template literal
+  document.getElementById('resultAvatar').src = logoSrc;
+
+  // Inject score breakdown panel separately between KPI strip and constraint banner
+  const breakdownPanel = document.createElement('div');
+  breakdownPanel.className = 'score-breakdown-panel';
+  breakdownPanel.innerHTML = `
+    <div class="score-breakdown-header">
+      <span class="score-breakdown-title">Score Breakdown</span>
+      <span class="score-breakdown-total">${totalScore} / 100 total</span>
+    </div>
+    ${[
+      { name: 'CTR Signal',           score: ctrScore, max: 30 },
+      { name: 'Impression Depth',     score: impScore, max: 25 },
+      { name: 'Views Per Impression', score: vpiScore, max: 25 },
+      { name: 'Upload Velocity',      score: velScore, max: 20 },
+    ].map(r => {
+      const pct = (r.score / r.max) * 100;
+      const col = (r.score/r.max) >= 0.7 ? 'var(--green)' : (r.score/r.max) >= 0.45 ? 'var(--amber)' : 'var(--red)';
+      return `<div class="score-breakdown-row">
+        <div class="score-breakdown-name">${r.name}</div>
+        <div class="score-breakdown-bar-track"><div class="score-breakdown-bar-fill" style="width:${pct}%;background:${col};"></div></div>
+        <div class="score-breakdown-score" style="color:${col};">${r.score}<span class="score-breakdown-denom">/${r.max}</span></div>
+        <div class="score-breakdown-gap">gap ${r.max - r.score}</div>
+      </div>`;
+    }).join('')}`;
+  const constraintBanner = document.querySelector('#results .constraint-banner');
+  constraintBanner.parentNode.insertBefore(breakdownPanel, constraintBanner);
 
   document.getElementById('results').style.display = 'block';
   document.getElementById('results').querySelectorAll('.repair-card').forEach(card => {
