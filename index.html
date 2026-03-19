@@ -444,6 +444,7 @@ function scoreChannel(tableRows, chartRows, totalsRows) {
     const ctr = Number(v['Impressions click-through rate (%)']) || 0;
     const avgViewSec = parseDuration(v['Average view duration'] || '');
     const watchHours = parseFloat(v['Watch time (hours)'] || 0);
+    const subs = Number(v['Subscribers'] || 0);
     const durSec = Number(v['Duration']) || 0;
     const retPct = durSec > 0 && avgViewSec > 0
       ? (avgViewSec / durSec) * 100
@@ -469,6 +470,8 @@ function scoreChannel(tableRows, chartRows, totalsRows) {
       }
     }
 
+    const momPct = momFeb > 0 ? Math.round(((momMar - momFeb) / momFeb) * 100) : null;
+
     let status, statusClass, priorityNum;
     if (vpiV >= 0.4) { status = 'Performing'; statusClass = 'pill-green'; priorityNum = 4; }
     else if (imps > 200 && ctr < 2.5) { status = 'Repackage'; statusClass = 'pill-red'; priorityNum = 1; }
@@ -477,8 +480,8 @@ function scoreChannel(tableRows, chartRows, totalsRows) {
     else if (ctr >= 4 && vpiV >= 0.2) { status = 'Performing'; statusClass = 'pill-green'; priorityNum = 4; }
     else { status = 'Stable'; statusClass = 'pill-amber'; priorityNum = 3; }
 
-    return { ...v, views, imps, ctr, avgViewSec, durSec, retPct, vpiV,
-             status, statusClass, priorityNum, momentum, momFeb, momMar };
+    return { ...v, views, imps, ctr, avgViewSec, durSec, retPct, vpiV, watchHours, subs,
+             status, statusClass, priorityNum, momentum, momFeb, momMar, momPct };
   });
   enriched.sort((a, b) => a.priorityNum - b.priorityNum);
 
@@ -569,11 +572,20 @@ function renderResults(data) {
   const tableRows = vids.map(v => {
     let momCell = '';
     if (hasMomentum) {
-      if (v.momentum === 'up') momCell = `<td><span class="momentum mom-up" title="Growing: ${v.momFeb}→${v.momMar}">↑</span></td>`;
-      else if (v.momentum === 'down') momCell = `<td><span class="momentum mom-down" title="Declining: ${v.momFeb}→${v.momMar}">↓</span></td>`;
-      else if (v.momentum === 'flat') momCell = `<td><span class="momentum mom-flat" title="Holding: ${v.momFeb}→${v.momMar}">→</span></td>`;
-      else momCell = `<td><span class="mom-new">new</span></td>`;
+      if (v.momentum === 'up') {
+        const pct = v.momPct !== null ? `+${v.momPct}%` : '';
+        momCell = `<td><span class="momentum mom-up">↑ <span style="font-size:10px;font-family:var(--mono);">${pct}</span></span></td>`;
+      } else if (v.momentum === 'down') {
+        const pct = v.momPct !== null ? `${v.momPct}%` : '';
+        momCell = `<td><span class="momentum mom-down">↓ <span style="font-size:10px;font-family:var(--mono);">${pct}</span></span></td>`;
+      } else if (v.momentum === 'flat') {
+        momCell = `<td><span class="momentum mom-flat">→ <span style="font-size:10px;font-family:var(--mono);">flat</span></span></td>`;
+      } else {
+        momCell = `<td><span class="mom-new">new</span></td>`;
+      }
     }
+    const watchCell = `<td class="mono">${v.watchHours > 0 ? v.watchHours.toFixed(1)+'h' : '—'}</td>`;
+    const subsCell = `<td class="mono" style="color:${v.subs > 0 ? 'var(--green)' : 'var(--text3)'}">${v.subs > 0 ? '+'+v.subs : '0'}</td>`;
     return `<tr>
       <td class="title-cell" title="${esc(v['Video title'])}">${esc(v['Video title'])}</td>
       <td class="mono">${v.views.toLocaleString()}</td>
@@ -581,6 +593,8 @@ function renderResults(data) {
       <td class="mono" style="color:${v.ctr < 3 ? 'var(--red)' : v.ctr < 4 ? 'var(--yellow)' : 'var(--green)'}">${v.ctr.toFixed(2)}%</td>
       <td class="mono" style="color:${v.vpiV >= 0.4 ? 'var(--green)' : v.vpiV >= 0.2 ? 'var(--amber)' : 'var(--text2)'}">${v.vpiV.toFixed(3)}</td>
       <td class="mono">${v.retPct > 0 ? v.retPct.toFixed(0)+'%' : '—'}</td>
+      ${watchCell}
+      ${subsCell}
       ${momCell}
       <td><span class="status-pill ${v.statusClass}">${v.status}</span></td>
     </tr>`;
@@ -630,7 +644,7 @@ function renderResults(data) {
       <div class="vt-header"><span class="vt-title">All videos — signal breakdown</span></div>
       <div class="table-scroll">
         <table>
-          <thead><tr><th>Video</th><th>Views</th><th>Impressions</th><th>CTR</th><th>VPI</th><th>Retention</th>${momHeader}<th>Status</th></tr></thead>
+          <thead><tr><th>Video</th><th>Views</th><th>Impressions</th><th>CTR</th><th>VPI</th><th>Retention</th><th>Watch Time</th><th>Subs</th>${momHeader}<th>Status</th></tr></thead>
           <tbody>${tableRows}</tbody>
         </table>
       </div>
@@ -765,7 +779,7 @@ function downloadXLSX() {
   wsSummary['!cols'] = [{wch:32},{wch:50},{wch:8},{wch:8}];
   XLSX.utils.book_append_sheet(wb, wsSummary, 'Summary');
 
-  const headers = ['Video Title', 'Published', 'Views', 'Impressions', 'CTR %', 'VPI', 'Retention %', 'Avg View Duration (s)', 'Duration (s)', 'Momentum', 'Status'];
+  const headers = ['Video Title', 'Published', 'Views', 'Impressions', 'CTR %', 'VPI', 'Retention %', 'Watch Time (hrs)', 'Subscribers', 'Avg View Duration (s)', 'Duration (s)', 'Momentum', 'Momentum %', 'Status'];
   const videoData = [headers, ...vids.map(v => [
     v['Video title'] || '',
     v['Video publish time'] || '',
@@ -774,9 +788,12 @@ function downloadXLSX() {
     parseFloat(v.ctr.toFixed(2)),
     parseFloat(v.vpiV.toFixed(3)),
     v.retPct > 0 ? parseFloat(v.retPct.toFixed(1)) : 'N/A',
+    v.watchHours > 0 ? parseFloat(v.watchHours.toFixed(2)) : 'N/A',
+    v.subs || 0,
     v.avgViewSec > 0 ? v.avgViewSec : 'N/A',
     v.durSec || '',
     v.momentum === 'up' ? '↑ Growing' : v.momentum === 'down' ? '↓ Declining' : v.momentum === 'flat' ? '→ Holding' : 'New',
+    v.momPct !== null ? v.momPct + '%' : 'N/A',
     v.status
   ])];
   const wsVideos = XLSX.utils.aoa_to_sheet(videoData);
