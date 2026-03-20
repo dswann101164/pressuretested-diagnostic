@@ -224,6 +224,26 @@ td.title-cell{color:var(--text);min-width:300px;max-width:420px;font-size:13px;}
 .reset-btn:hover{color:var(--amber);border-color:var(--amber);}
 
 .score-danger{color:var(--red);}
+.seven-day-panel{background:var(--navy-700);border:1.5px solid rgba(255,255,255,0.32);border-radius:8px;overflow:hidden;margin-bottom:1rem;}
+.seven-day-header{padding:.9rem 1.25rem;border-bottom:1px solid var(--border);background:var(--navy-900);display:flex;align-items:center;justify-content:space-between;}
+.seven-day-title{font-family:var(--display);font-size:13px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--amber);}
+.seven-day-sub{font-family:var(--mono);font-size:10px;color:var(--text3);}
+.seven-day-grid{display:grid;grid-template-columns:repeat(7,1fr);}
+.day-col{border-right:1px solid var(--border);padding:.85rem .75rem;}
+.day-col:last-child{border-right:none;}
+.day-num{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:.35rem;}
+.day-label{font-family:var(--display);font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:.5rem;line-height:1.2;}
+.day-task{font-size:11px;color:var(--text2);line-height:1.5;margin-bottom:.5rem;}
+.day-time{font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:3px;display:inline-block;}
+.day-col.priority-1 .day-label{color:var(--red);}
+.day-col.priority-1 .day-time{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);}
+.day-col.priority-2 .day-label{color:var(--yellow);}
+.day-col.priority-2 .day-time{background:var(--yellow-bg);color:var(--yellow);border:1px solid var(--yellow-border);}
+.day-col.priority-3 .day-label{color:var(--amber);}
+.day-col.priority-3 .day-time{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border);}
+.day-col.priority-4 .day-label{color:var(--green);}
+.day-col.priority-4 .day-time{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
+@media(max-width:640px){.seven-day-grid{grid-template-columns:1fr 1fr;}.day-col{border-right:none;border-bottom:1px solid var(--border);}}
 .score-warning{color:var(--yellow);}
 .score-ok{color:var(--amber);}
 .score-good{color:var(--green);}
@@ -652,6 +672,8 @@ function renderResults(data) {
       </div>
     </div>
 
+    ${build7DayPlan(vids, data)}
+
     ${spotlightHTML}
 
     <p class="queue-label">Repair queue — in priority order</p>
@@ -910,7 +932,59 @@ function buildRepairCards(vids, data) {
   return cards.join('');
 }
 
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function build7DayPlan(vids, data) {
+  var avgCTR = data.avgCTR;
+  var worstCTR = vids.filter(function(v){return v.imps>100;}).sort(function(a,b){return a.ctr-b.ctr;})[0];
+  var bestVid = vids.slice().sort(function(a,b){return b.vpiV-a.vpiV;})[0];
+  var hiddenGem = vids.filter(function(v){return v.imps<60&&v.ctr>6;}).sort(function(a,b){return b.ctr-a.ctr;})[0];
+  var lowSubs = vids.filter(function(v){return v.subs===0;}).length;
+  var repackageCount = vids.filter(function(v){return v.status==='Repackage';}).length;
+
+  var d1task, d2task, d3task, d4task, d5task, d6task, d7task;
+  var d1p='priority-1', d2p='priority-1', d3p='priority-2', d4p='priority-2', d5p='priority-3', d6p='priority-3', d7p='priority-4';
+
+  // Day 1-2: CTR fix on worst performer
+  if (worstCTR) {
+    d1task = 'Write 3 new title options for <em>'+esc(truncate(worstCTR['Video title'],32))+'</em>. Lead with the outcome. Test each against your top video's title structure.';
+    d2task = 'Create a new thumbnail for that video. High contrast, single focal point. Upload replacement in YouTube Studio → three dots → Replace video thumbnail.';
+  } else {
+    d1p='priority-2'; d2p='priority-2';
+    d1task = 'Audit all titles. Rewrite any title that doesn't answer "what's in it for me?" in the first 6 words.';
+    d2task = 'Check thumbnails against your top performer. Are they visually consistent? Same energy, same face expression style?';
+  }
+
+  // Day 3-4: End screens + internal linking
+  d3task = bestVid
+    ? 'Open every video in YouTube Studio. Add end screen cards pointing to <em>'+esc(truncate(bestVid['Video title'],32))+'</em> — your strongest signal video.'
+    : 'Open every video and verify end screens are set. Every video should point to at least 2 others.';
+  d4task = 'Update descriptions on your 3 most-viewed videos. Add pressuretested.co CTA in line 1. Plain text only — no hyperlinks (they get flagged).';
+
+  // Day 5-6: Upload + distribution
+  if (hiddenGem) {
+    d5task = 'Post a Community tab update featuring <em>'+esc(truncate(hiddenGem['Video title'],32))+'</em>. It has '+hiddenGem.ctr.toFixed(1)+'% CTR but only '+hiddenGem.imps+' impressions — it needs distribution fuel.';
+  } else {
+    d5task = 'Post a Community tab update linking to your lowest-impression video that has CTR above 3%. Give it distribution you can control.';
+  }
+  d6task = 'Film or finalize your next video. Topic must serve the same audience as your top performer. If your top video solved a problem — this one extends that solution.';
+
+  // Day 7: Review + score
+  d7task = 'Re-run this diagnostic. Compare your new Signal Score to today's '+Math.round(data.totalScore)+'/100. Document what changed and what didn't. That's your Sprint 2 baseline.';
+  d7p = 'priority-4';
+
+  return '<div class="seven-day-panel">'
+    + '<div class="seven-day-header"><span class="seven-day-title">Your Next 7 Days</span><span class="seven-day-sub">Based on your actual data — do these in order</span></div>'
+    + '<div class="seven-day-grid">'
+    + '<div class="day-col '+d1p+'"><div class="day-num">Day 1</div><div class="day-label">Rewrite</div><div class="day-task">'+d1task+'</div><div class="day-time">60 min</div></div>'
+    + '<div class="day-col '+d2p+'"><div class="day-num">Day 2</div><div class="day-label">Thumbnail</div><div class="day-task">'+d2task+'</div><div class="day-time">90 min</div></div>'
+    + '<div class="day-col '+d3p+'"><div class="day-num">Day 3</div><div class="day-label">End Screens</div><div class="day-task">'+d3task+'</div><div class="day-time">30 min</div></div>'
+    + '<div class="day-col '+d4p+'"><div class="day-num">Day 4</div><div class="day-label">Descriptions</div><div class="day-task">'+d4task+'</div><div class="day-time">30 min</div></div>'
+    + '<div class="day-col '+d5p+'"><div class="day-num">Day 5</div><div class="day-label">Distribute</div><div class="day-task">'+d5task+'</div><div class="day-time">20 min</div></div>'
+    + '<div class="day-col '+d6p+'"><div class="day-num">Day 6</div><div class="day-label">Film</div><div class="day-task">'+d6task+'</div><div class="day-time">2–3 hrs</div></div>'
+    + '<div class="day-col '+d7p+'"><div class="day-num">Day 7</div><div class="day-label">Re-Score</div><div class="day-task">'+d7task+'</div><div class="day-time">15 min</div></div>'
+    + '</div></div>';
+}
+
+function esc(s){return String(s||'')function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function truncate(s,n){return s&&s.length>n?s.slice(0,n)+'…':s||'';}
 function resetTool(){
   document.getElementById('results').style.display='none';
