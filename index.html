@@ -650,6 +650,7 @@ function renderResults(data) {
       <td class="title-cell" title="${esc(v['Video title'])}">${esc(v['Video title'])}</td>
       <td class="mono">${v.views.toLocaleString()}</td>
       <td class="mono">${v.imps.toLocaleString()}</td>
+      <td class="mono">${Math.round(v.imps * v.ctr / 100)}</td>
       <td class="mono" style="color:${v.ctr < 3 ? 'var(--red)' : v.ctr < 4 ? 'var(--yellow)' : 'var(--green)'}">${v.ctr.toFixed(2)}%</td>
       <td class="mono" style="color:${v.vpiV >= 0.4 ? 'var(--green)' : v.vpiV >= 0.2 ? 'var(--amber)' : 'var(--text2)'}">${v.vpiV.toFixed(3)}</td>
       <td class="mono">${v.retPct > 0 ? v.retPct.toFixed(0)+'%' : '—'}</td>
@@ -706,7 +707,7 @@ function renderResults(data) {
       <div class="vt-header"><span class="vt-title">All videos — signal breakdown</span></div>
       <div class="table-scroll">
         <table>
-          <thead><tr><th>Video</th><th>Views</th><th>Impressions</th><th>CTR</th><th>VPI</th><th>Retention</th><th>Watch Time</th><th>Subs</th>${momHeader}<th>Status</th></tr></thead>
+          <thead><tr><th>Video</th><th>Views</th><th>Impressions</th><th>Clicks</th><th>CTR</th><th>VPI</th><th>Retention</th><th>Watch Time</th><th>Subs</th>${momHeader}<th>Status</th></tr></thead>
           <tbody>${tableRows}</tbody>
         </table>
       </div>
