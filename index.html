@@ -244,6 +244,23 @@ td.title-cell{color:var(--text);min-width:300px;max-width:420px;font-size:13px;}
 .score-ok{color:var(--amber);}
 .score-good{color:var(--green);}
 
+/* NICHE ALIGNMENT BANNER */
+.niche-banner{background:rgba(240,165,0,0.06);border:1.5px solid rgba(240,165,0,0.4);border-left:4px solid var(--amber);border-radius:var(--radius);padding:1rem 1.5rem;margin-bottom:1rem;display:flex;align-items:flex-start;justify-content:space-between;gap:1.5rem;flex-wrap:wrap;}
+.niche-banner-left{flex:1;min-width:200px;}
+.niche-banner-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--amber);margin-bottom:.3rem;}
+.niche-banner-declared{font-family:var(--display);font-size:1.1rem;font-weight:700;letter-spacing:0.02em;color:var(--text);margin-bottom:.2rem;}
+.niche-banner-detected{font-size:12px;color:var(--text2);margin-top:.3rem;}
+.niche-align-score{text-align:center;flex-shrink:0;}
+.align-num{font-family:var(--display);font-size:2.2rem;font-weight:800;line-height:1;}
+.align-label{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-top:3px;}
+.align-good{color:var(--green);}
+.align-warn{color:var(--yellow);}
+.align-bad{color:var(--red);}
+.density-tag{display:inline-block;font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:4px;margin-left:8px;vertical-align:middle;}
+.density-under{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
+.density-mod{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border);}
+.density-crowd{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);}
+
 /* FOOTER */
 footer{background:var(--navy-900);border-top:1px solid var(--border);padding:2rem;text-align:center;}
 .footer-inner{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;}
@@ -444,6 +461,62 @@ async function handleZip(file) {
   }
 }
 
+// ── LAYER 1 CONTEXT — read URL params ──
+const _L1 = (function() {
+  const p = new URLSearchParams(window.location.search);
+  return {
+    name:       p.get('name') || '',
+    niche:      p.get('niche') || '',
+    density:    p.get('density') || '',
+    background: p.get('background') || '',
+    passion:    p.get('passion') || '',
+    status:     p.get('status') || ''
+  };
+})();
+
+// ── NICHE DETECTION from video titles ──
+function detectNiche(titles) {
+  const text = titles.join(' ').toLowerCase();
+  const rules = [
+    {keys:['finops','cloud cost','cloud bill','cost management','cloud spend'], niche:'IT FinOps & Cloud Cost Management'},
+    {keys:['azure','aws','gcp','devops','kubernetes','cloud architect','infrastructure'], niche:'Cloud Architecture & IT Strategy'},
+    {keys:['career transition','second career','exit ramp','layoff','displacement','ai replace','job loss'], niche:'Career Transition for Professionals 40+'},
+    {keys:['youtube','channel growth','ctr','thumbnail','signal','algorithm','creator','views','impressions'], niche:'YouTube Creator Education'},
+    {keys:['accounting','tax','cpa','audit','bookkeeping','financial statement'], niche:'Accounting & Finance'},
+    {keys:['real estate','rental','landlord','property','investing in real'], niche:'Real Estate Investing'},
+    {keys:['personal finance','debt','retire','saving','wealth','money','budget'], niche:'Personal Finance & Wealth Building'},
+    {keys:['leadership','manager','executive','managing','team lead','corporate'], niche:'Leadership & Management'},
+    {keys:['legal','lawyer','attorney','contract','law '], niche:'Legal Guidance'},
+    {keys:['health','fitness','workout','nutrition','wellness'], niche:'Health & Wellness'},
+    {keys:['woodwork','diy','build','workshop','tool','craft'], niche:'Woodworking & DIY'},
+    {keys:['fishing','hunting','outdoor','camping','nature'], niche:'Outdoors & Lifestyle'},
+    {keys:['cooking','recipe','food','kitchen','baking'], niche:'Food & Cooking'},
+  ];
+  for (const r of rules) {
+    if (r.keys.some(k => text.includes(k))) return r.niche;
+  }
+  return 'General Professional Content';
+}
+
+// ── ALIGNMENT SCORE ──
+function calcAlignment(declared, detected) {
+  if (!declared) return null;
+  const d1 = declared.toLowerCase();
+  const d2 = detected.toLowerCase();
+  // Check word overlap
+  const words1 = d1.split(/\W+/).filter(w => w.length > 3);
+  const words2 = d2.split(/\W+/).filter(w => w.length > 3);
+  const overlap = words1.filter(w => words2.includes(w)).length;
+  const maxWords = Math.max(words1.length, 1);
+  const wordScore = Math.min(overlap / maxWords, 1);
+  // Exact niche match
+  if (d1 === d2) return 100;
+  // Partial match
+  if (wordScore > 0.5) return Math.round(70 + wordScore * 30);
+  if (wordScore > 0.2) return Math.round(40 + wordScore * 100);
+  return Math.round(wordScore * 100 + 15);
+}
+
 // ── SCORING ENGINE ──
 function scoreChannel(tableRows, chartRows, totalsRows) {
   const vids = tableRows.filter(v => v['Video title'] && v['Video title'].length > 0 && v['Content'] !== '');
@@ -534,10 +607,15 @@ function scoreChannel(tableRows, chartRows, totalsRows) {
   ];
   scores.sort((a, b) => (a.score / a.max) - (b.score / b.max));
 
+  const titles = enriched.map(v => v['Video title'] || '');
+  const detectedNiche = detectNiche(titles);
+  const alignScore = calcAlignment(_L1.niche, detectedNiche);
+
   const result = {
     vids: enriched, totalViews, totalImpressions, avgCTR, vpi,
     totalScore, ctrScore, impScore, vpiScore, velScore,
-    constraint: scores[0], totalsMonths, hasMomentum: Object.keys(momentumMap).length > 0
+    constraint: scores[0], totalsMonths, hasMomentum: Object.keys(momentumMap).length > 0,
+    detectedNiche, alignScore
   };
   window._lastData = result;
   return result;
@@ -574,7 +652,7 @@ function build7DayPlan(vids, data) {
 function renderResults(data) {
   const { vids, totalViews, totalImpressions, avgCTR, vpi,
           totalScore, ctrScore, impScore, vpiScore, velScore,
-          constraint, totalsMonths, hasMomentum } = data;
+          constraint, totalsMonths, hasMomentum, detectedNiche, alignScore } = data;
 
   const scoreColor = totalScore < 30 ? 'score-danger' : totalScore < 50 ? 'score-warning' : totalScore < 70 ? 'score-ok' : 'score-good';
   const logoSrc = document.querySelector('.logo img').src;
@@ -679,6 +757,21 @@ function renderResults(data) {
 
     ${pulseHTML}
 
+    ${(function() {
+      if (!_L1.niche && !detectedNiche) return '';
+      const densityClass = _L1.density === 'Underserved' ? 'density-under' : _L1.density === 'Crowded' ? 'density-crowd' : 'density-mod';
+      const alignClass = !alignScore ? '' : alignScore >= 70 ? 'align-good' : alignScore >= 40 ? 'align-warn' : 'align-bad';
+      const alignMsg = !alignScore ? '' : alignScore >= 70 ? 'Strong alignment' : alignScore >= 40 ? 'Partial drift — review topic focus' : 'Significant drift — channel not matching declared niche';
+      const declaredHTML = _L1.niche
+        ? `<div class="niche-banner-declared">${esc(_L1.niche)}<span class="density-tag ${densityClass}">${esc(_L1.density)}</span></div>`
+        : `<div class="niche-banner-declared" style="color:var(--text3);">No declared niche — complete pressuretested.co intake first</div>`;
+      const detectedHTML = `<div class="niche-banner-detected">Detected from titles: <strong style="color:var(--text)">${esc(detectedNiche)}</strong></div>`;
+      const alignHTML = alignScore !== null
+        ? `<div class="niche-align-score"><div class="align-num ${alignClass}">${alignScore}%</div><div class="align-label">Niche alignment</div><div style="font-size:11px;color:var(--text3);margin-top:3px;font-family:var(--mono);">${alignMsg}</div></div>`
+        : '';
+      return `<div class="niche-banner"><div class="niche-banner-left"><div class="niche-banner-eyebrow">⚡ Positioning — declared vs detected</div>${declaredHTML}${detectedHTML}</div>${alignHTML}</div>`;
+    })()}
+
     <div class="kpi-strip">
       <div class="kpi-card"><div class="kpi-val">${totalViews.toLocaleString()}</div><div class="kpi-label">Total views</div></div>
       <div class="kpi-card"><div class="kpi-val">${totalImpressions.toLocaleString()}</div><div class="kpi-label">Impressions</div></div>
@@ -752,6 +845,19 @@ function renderResults(data) {
   // Inject score breakdown panel separately between KPI strip and constraint banner
   const breakdownPanel = document.createElement('div');
   breakdownPanel.className = 'score-breakdown-panel';
+
+  // Build alignment row if we have data
+  const alignRowHTML = (_L1.niche && alignScore !== null) ? (() => {
+    const pct = alignScore;
+    const col = alignScore >= 70 ? 'var(--green)' : alignScore >= 40 ? 'var(--amber)' : 'var(--red)';
+    return `<div class="score-breakdown-row" style="border-top:1px solid rgba(240,165,0,0.2);background:rgba(240,165,0,0.03);">
+      <div class="score-breakdown-name" style="color:var(--amber);">Niche Alignment</div>
+      <div class="score-breakdown-bar-track"><div class="score-breakdown-bar-fill" style="width:${pct}%;background:${col};"></div></div>
+      <div class="score-breakdown-score" style="color:${col};">${alignScore}<span class="score-breakdown-denom">%</span></div>
+      <div class="score-breakdown-gap" style="color:${col};font-size:10px;">${alignScore >= 70 ? 'aligned' : alignScore >= 40 ? 'drifting' : 'off-niche'}</div>
+    </div>`;
+  })() : '';
+
   breakdownPanel.innerHTML = `
     <div class="score-breakdown-header">
       <span class="score-breakdown-title">Score Breakdown</span>
@@ -771,7 +877,8 @@ function renderResults(data) {
         <div class="score-breakdown-score" style="color:${col};">${r.score}<span class="score-breakdown-denom">/${r.max}</span></div>
         <div class="score-breakdown-gap">gap ${r.max - r.score}</div>
       </div>`;
-    }).join('')}`;
+    }).join('')}
+    ${alignRowHTML}`;
   const constraintBanner = document.querySelector('#results .constraint-banner');
   constraintBanner.parentNode.insertBefore(breakdownPanel, constraintBanner);
 
