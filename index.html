@@ -503,7 +503,8 @@ function calcAlignment(declared, detected) {
   if (!declared) return null;
   const d1 = declared.toLowerCase();
   const d2 = detected.toLowerCase();
-  // Check word overlap
+  const passion = (_L1.passion || '').toLowerCase();
+  // Check word overlap between declared and detected
   const words1 = d1.split(/\W+/).filter(w => w.length > 3);
   const words2 = d2.split(/\W+/).filter(w => w.length > 3);
   const overlap = words1.filter(w => words2.includes(w)).length;
@@ -511,10 +512,22 @@ function calcAlignment(declared, detected) {
   const wordScore = Math.min(overlap / maxWords, 1);
   // Exact niche match
   if (d1 === d2) return 100;
+  // Passion boost — if passion terms surface in detected niche, strengthen alignment
+  let passionBoost = 0;
+  if (passion) {
+    const passionWords = passion.split(/\W+/).filter(w => w.length > 3);
+    if (passionWords.length > 0) {
+      const passionInDetected = passionWords.filter(w => d2.includes(w)).length;
+      const passionInDeclared = passionWords.filter(w => d1.includes(w)).length;
+      passionBoost = Math.round(((passionInDetected + passionInDeclared) / (passionWords.length * 2)) * 20);
+    }
+  }
   // Partial match
-  if (wordScore > 0.5) return Math.round(70 + wordScore * 30);
-  if (wordScore > 0.2) return Math.round(40 + wordScore * 100);
-  return Math.round(wordScore * 100 + 15);
+  let base;
+  if (wordScore > 0.5) base = Math.round(70 + wordScore * 30);
+  else if (wordScore > 0.2) base = Math.round(40 + wordScore * 100);
+  else base = Math.round(wordScore * 100 + 15);
+  return Math.min(100, base + passionBoost);
 }
 
 // ── SCORING ENGINE ──
