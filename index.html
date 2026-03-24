@@ -303,7 +303,7 @@ footer{background:var(--navy-900);border-top:1px solid var(--border);padding:2re
 </style>
 </head>
 <body>
-<div id="intakeOverlay"><div id="intakeModal"><h2>Before We Score Your Channel</h2><p>Enter your details so your results are saved and tracked over time.</p><div class="intake-field"><label>Your Name</label><input type="text" id="intakeName" placeholder="David Swann" autocomplete="name"></div><div class="intake-field"><label>Email Address</label><input type="email" id="intakeEmail" placeholder="david@pressuretested.co" autocomplete="email"></div><button id="intakeSubmit">Run My Diagnostic</button><span id="intakeSkip">Skip - run without saving</span></div></div>
+<div id="intakeOverlay"><div id="intakeModal"><h2>Before We Score Your Channel</h2><p>Enter your details so your results are saved and tracked over time.</p><div class="intake-field"><label>Your Name</label><input type="text" id="intakeName" placeholder="David Swann" autocomplete="name"></div><div class="intake-field"><label>Email Address</label><input type="email" id="intakeEmail" placeholder="david@pressuretested.co" autocomplete="email"></div><div class="intake-field"><label>YouTube Channel URL <span style="opacity:0.5;font-weight:400;">(optional)</span></label><input type="url" id="intakeChannelUrl" placeholder="https://youtube.com/@your-channel" autocomplete="url"></div><button id="intakeSubmit">Run My Diagnostic</button><span id="intakeSkip">Skip - run without saving</span></div></div>
 
 <header class="site-header">
   <a href="https://pressuretested.co/" class="logo">
@@ -781,6 +781,7 @@ function renderResults(data) {
       <div class="score-display">
         <div class="score-num ${scoreColor}">${totalScore}<span class="score-denom">/100</span></div>
         <div class="score-label">Signal score</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--amber);margin-top:6px;">Projected after repairs: <strong>${Math.min(100, totalScore + (ctrScore < 15 ? 15 : 0) + (impScore < 15 ? 8 : 0) + (vpiScore < 15 ? 8 : 0) + (velScore < 15 ? 5 : 0))}/100</strong></div>
       </div>
     </div>
 
@@ -1219,7 +1220,7 @@ async function submitIntake() {
           'Content-Type': 'application/json',
           'Prefer': 'resolution=merge-duplicates,return=representation'
         },
-        body: JSON.stringify({name: name, email: email, status: 'active'})
+        body: JSON.stringify({name: name, email: email, channel_url: (document.getElementById('intakeChannelUrl')?.value.trim() || null), status: 'active'})
       });
       if (res.ok) {
         var d = await res.json();
