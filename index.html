@@ -287,9 +287,23 @@ footer{background:var(--navy-900);border-top:1px solid var(--border);padding:2re
   .repair-head{padding:.5rem!important;}
   .repair-card{break-inside:avoid;}
 }
+
+#intakeOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:9999;align-items:center;justify-content:center;}
+#intakeOverlay.active{display:flex;}
+#intakeModal{background:#0D1B2A;border:1px solid rgba(201,168,76,0.35);border-top:3px solid #C9A84C;padding:2rem;width:100%;max-width:420px;font-family:inherit;}
+#intakeModal h2{font-size:1.1rem;font-weight:700;color:#C9A84C;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.4rem;}
+#intakeModal p{font-size:0.8rem;color:#6b8299;margin-bottom:1.5rem;line-height:1.5;}
+.intake-field{margin-bottom:1rem;}
+.intake-field label{display:block;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:#6b8299;margin-bottom:0.35rem;}
+.intake-field input{width:100%;background:#122233;border:1px solid rgba(201,168,76,0.2);color:#F4F1EC;padding:0.6rem 0.75rem;font-size:0.85rem;font-family:inherit;outline:none;box-sizing:border-box;}
+.intake-field input:focus{border-color:#C9A84C;}
+#intakeSubmit{width:100%;background:#C9A84C;color:#0D1B2A;border:none;padding:0.75rem;font-size:0.85rem;font-weight:700;text-transform:uppercase;cursor:pointer;margin-top:0.5rem;font-family:inherit;}
+#intakeSubmit:hover{background:#b8933e;}
+#intakeSkip{display:block;text-align:center;margin-top:0.75rem;font-size:0.72rem;color:#6b8299;cursor:pointer;text-decoration:underline;}
 </style>
 </head>
 <body>
+<div id="intakeOverlay"><div id="intakeModal"><h2>Before We Score Your Channel</h2><p>Enter your details so your results are saved and tracked over time.</p><div class="intake-field"><label>Your Name</label><input type="text" id="intakeName" placeholder="David Swann" autocomplete="name"></div><div class="intake-field"><label>Email Address</label><input type="email" id="intakeEmail" placeholder="david@pressuretested.co" autocomplete="email"></div><button id="intakeSubmit">Run My Diagnostic</button><span id="intakeSkip">Skip - run without saving</span></div></div>
 
 <header class="site-header">
   <a href="https://pressuretested.co/" class="logo">
@@ -1093,7 +1107,13 @@ function resetTool(){
 dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('drag-over');});
 dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('drag-over'));
 dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('drag-over');handleFile(e.dataTransfer.files[0]);});
-fileInput.addEventListener('change',()=>handleFile(fileInput.files[0]));
+fileInput.addEventListener('change', function() {
+  _pendingFile = fileInput.files[0];
+  if (_pendingFile) {
+    document.getElementById('intakeOverlay').classList.add('active');
+    document.getElementById('intakeName').focus();
+  }
+});
 </script>
 
 
@@ -1177,10 +1197,49 @@ async function postDiagnosticRun(scoreData) {
     await fetch(SUPABASE_URL + '/rest/v1/diagnostic_runs', {
       method: 'POST',
       headers: {'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal'},
-      body: JSON.stringify({signal_score: scoreData.total, ctr_signal: scoreData.ctr, impression_depth: scoreData.impressions, vpi: scoreData.vpi, velocity: scoreData.velocity, avg_ctr: scoreData.avgCtr, total_views: scoreData.totalViews, total_impressions: scoreData.totalImpressions, videos_analyzed: scoreData.videosAnalyzed, primary_constraint: scoreData.primaryConstraint})
+      body: JSON.stringify({client_id: _clientId, signal_score: scoreData.total, ctr_signal: scoreData.ctr, impression_depth: scoreData.impressions, vpi: scoreData.vpi, velocity: scoreData.velocity, avg_ctr: scoreData.avgCtr, total_views: scoreData.totalViews, total_impressions: scoreData.totalImpressions, videos_analyzed: scoreData.videosAnalyzed, primary_constraint: scoreData.primaryConstraint})
     });
     console.log('Run saved to Supabase');
   } catch(e) { console.warn('Supabase post failed:', e); }
 }
+let _pendingFile = null;
+let _clientId = null;
+
+async function submitIntake() {
+  var name = document.getElementById('intakeName').value.trim();
+  var email = document.getElementById('intakeEmail').value.trim();
+  document.getElementById('intakeOverlay').classList.remove('active');
+  if (name && email) {
+    try {
+      var res = await fetch(SUPABASE_URL + '/rest/v1/clients', {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=merge-duplicates,return=representation'
+        },
+        body: JSON.stringify({name: name, email: email, status: 'active'})
+      });
+      if (res.ok) {
+        var d = await res.json();
+        _clientId = (d[0] && d[0].id) ? d[0].id : null;
+      }
+    } catch(e) { console.warn('Client save failed:', e); }
+  }
+  if (_pendingFile) handleFile(_pendingFile);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var submitBtn = document.getElementById('intakeSubmit');
+  var skipBtn = document.getElementById('intakeSkip');
+  if (submitBtn) submitBtn.addEventListener('click', submitIntake);
+  if (skipBtn) skipBtn.addEventListener('click', function() {
+    _clientId = null;
+    document.getElementById('intakeOverlay').classList.remove('active');
+    if (_pendingFile) handleFile(_pendingFile);
+  });
+});
+
 </script>
 </body>
