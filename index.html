@@ -287,32 +287,9 @@ footer{background:var(--navy-900);border-top:1px solid var(--border);padding:2re
   .repair-head{padding:.5rem!important;}
   .repair-card{break-inside:avoid;}
 }
-
-#intakeOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;align-items:center;justify-content:center;}
-#intakeOverlay.active{display:flex;}
-#intakeModal{background:#0D1B2A;border:1px solid rgba(201,168,76,0.3);border-top:3px solid #C9A84C;padding:2rem;width:100%;max-width:420px;}
-#intakeModal h2{font-size:1.1rem;font-weight:700;color:#C9A84C;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.5rem;}
-#intakeModal p{font-size:0.8rem;color:#6b8299;margin-bottom:1.5rem;line-height:1.5;}
-.intake-field{margin-bottom:1rem;}
-.intake-field label{display:block;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:#6b8299;margin-bottom:0.4rem;}
-.intake-field input{width:100%;background:#122233;border:1px solid rgba(201,168,76,0.2);color:#F4F1EC;padding:0.6rem 0.75rem;font-size:0.85rem;font-family:inherit;outline:none;box-sizing:border-box;}
-.intake-field input:focus{border-color:#C9A84C;}
-#intakeSubmit{width:100%;background:#C9A84C;color:#0D1B2A;border:none;padding:0.75rem;font-size:0.85rem;font-weight:700;text-transform:uppercase;cursor:pointer;margin-top:0.5rem;}
-#intakeSkip{display:block;text-align:center;margin-top:0.75rem;font-size:0.72rem;color:#6b8299;cursor:pointer;text-decoration:underline;}
-
 </style>
 </head>
 <body>
-<div id="intakeOverlay">
-  <div id="intakeModal">
-    <h2>Before We Score Your Channel</h2>
-    <p>Enter your details so results are saved and tracked over time.</p>
-    <div class="intake-field"><label>Your Name</label><input type="text" id="intakeName" placeholder="David Swann" autocomplete="name"></div>
-    <div class="intake-field"><label>Email Address</label><input type="email" id="intakeEmail" placeholder="david@pressuretested.co" autocomplete="email"></div>
-    <button id="intakeSubmit">Run My Diagnostic</button>
-    <span id="intakeSkip">Skip - run without saving</span>
-  </div>
-</div>
 
 <header class="site-header">
   <a href="https://pressuretested.co/" class="logo">
@@ -1069,46 +1046,141 @@ function downloadHTML() {
 </div>
 ${content}
 <div class="report-footer">Pressure Tested Signal Diagnostic · pressuretested.co · youtube.com/@pressure-tester</div>
+</body></html>`;
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `pressure-tested-signal-report-${new Date().toISOString().slice(0,10)}.html`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
+function buildRepairCards(vids, data) {
+  const cards = [];
+  const { avgCTR } = data;
+  const worstCTR = vids.filter(v => v.imps > 100).sort((a, b) => a.ctr - b.ctr)[0];
+  const hiddenGem = vids.filter(v => v.imps < 60 && v.ctr > 6).sort((a, b) => b.ctr - a.ctr)[0];
+  const bestVid = [...vids].sort((a, b) => b.vpiV - a.vpiV)[0];
+  const lowSignal = vids.filter(v => v.views < 10);
+  const dyingVids = vids.filter(v => v.momentum === 'down');
+
+  if (worstCTR) cards.push(`<div class="repair-card"><div class="repair-head"><div class="p-badge p1">1</div><div class="repair-meta"><div class="repair-signal">Packaging / CTR</div><div class="repair-title">${esc(truncate(worstCTR['Video title'],55))}</div></div><div class="repair-stat stat-red">${worstCTR.ctr.toFixed(2)}% CTR</div><div class="chevron">▾</div></div><div class="repair-body"><div class="body-section"><div class="body-label">Why it's broken</div><div class="body-text">YouTube served this video ${worstCTR.imps.toLocaleString()} impressions. Only ${worstCTR.views} clicked (${worstCTR.ctr.toFixed(2)}%). Healthy range is 4–8%. The packaging — thumbnail and title — isn't matching audience expectations.</div></div><div class="body-section"><div class="body-label">The numbers</div><div class="chips"><span class="chip bad">${worstCTR.imps.toLocaleString()} impressions</span><span class="chip bad">${worstCTR.views} clicks (${worstCTR.ctr.toFixed(2)}%)</span><span class="chip">Channel avg: ${avgCTR.toFixed(2)}%</span><span class="chip">Target: 4–8%</span></div></div><div class="action-box"><div class="action-arrow">→</div><div class="action-text"><strong>Repair:</strong> Rewrite the title to lead with the outcome or problem. New thumbnail: high contrast, single focal point, strong emotion or curiosity gap. Must answer "what's in it for me?" before the click.</div></div></div></div>`);
+
+  if (lowSignal.length >= 2) cards.push(`<div class="repair-card"><div class="repair-head"><div class="p-badge p2">2</div><div class="repair-meta"><div class="repair-signal">Topic Consistency / Channel identity</div><div class="repair-title">${lowSignal.length} videos with fewer than 10 views</div></div><div class="repair-stat stat-yellow">${lowSignal.length} videos</div><div class="chevron">▾</div></div><div class="repair-body"><div class="body-section"><div class="body-label">Why it matters</div><div class="body-text">YouTube builds an audience model from each video. Multiple videos failing to attract consistent viewers means the algorithm can't decide who to send your content to.</div></div><div class="body-section"><div class="body-label">Underperforming videos</div><div class="chips">${lowSignal.map(v=>`<span class="chip bad">${esc(truncate(v['Video title'],38))}</span>`).join('')}${bestVid?`<span class="chip good">${esc(truncate(bestVid['Video title'],38))} ✓</span>`:''}</div></div><div class="action-box"><div class="action-arrow">→</div><div class="action-text"><strong>Repair:</strong> Re-angle underperforming titles and thumbnails toward the same audience and problem as your top performer. Consistency in audience targeting beats variety at this stage.</div></div></div></div>`);
+
+  if (dyingVids.length > 0) cards.push(`<div class="repair-card"><div class="repair-head"><div class="p-badge p2">2b</div><div class="repair-meta"><div class="repair-signal">Momentum / Declining videos</div><div class="repair-title">${dyingVids.length} video${dyingVids.length>1?'s':''} losing views month-over-month</div></div><div class="repair-stat stat-red">↓ Declining</div><div class="chevron">▾</div></div><div class="repair-body"><div class="body-section"><div class="body-label">Which videos</div><div class="chips">${dyingVids.map(v=>`<span class="chip bad">${esc(truncate(v['Video title'],38))} (${v.momFeb}→${v.momMar})</span>`).join('')}</div></div><div class="action-box"><div class="action-arrow">→</div><div class="action-text"><strong>Repair:</strong> Add end screen cards pointing from these videos to your current top performer. A decaying video can still feed your channel's best signal.</div></div></div></div>`);
+
+  if (hiddenGem) cards.push(`<div class="repair-card"><div class="repair-head"><div class="p-badge p3">3</div><div class="repair-meta"><div class="repair-signal">Distribution / Hidden opportunity</div><div class="repair-title">${esc(truncate(hiddenGem['Video title'],55))}</div></div><div class="repair-stat stat-amber">${hiddenGem.ctr.toFixed(1)}% CTR, ${hiddenGem.imps} imps</div><div class="chevron">▾</div></div><div class="repair-body"><div class="body-section"><div class="body-label">Why it matters</div><div class="body-text">Strong CTR (${hiddenGem.ctr.toFixed(1)}%) but only ${hiddenGem.imps} impressions. YouTube hasn't committed to distributing it yet.</div></div><div class="action-box"><div class="action-arrow">→</div><div class="action-text"><strong>Repair:</strong> Add an end screen from your top performer pointing here. Post a Community tab update with a direct link.</div></div></div></div>`);
+
+  cards.push(`<div class="repair-card"><div class="repair-head"><div class="p-badge p4">4</div><div class="repair-meta"><div class="repair-signal">Upload velocity / Cadence</div><div class="repair-title">Maintain consistent upload rhythm</div></div><div class="repair-stat stat-green">Monitor</div><div class="chevron">▾</div></div><div class="repair-body"><div class="body-section"><div class="body-label">Why it matters</div><div class="body-text">The algorithm learns faster with a consistent data stream. Upload gaps reset momentum. Fix topic clarity first — consistent uploads of mixed-audience content makes channel identity confusion worse.</div></div><div class="action-box"><div class="action-arrow">→</div><div class="action-text"><strong>Target:</strong> 2 uploads per week, no gap longer than 5 days. Focused, consistent content on one audience problem accelerates algorithm classification.</div></div></div></div>`);
+
+  return cards.join('');
+}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function truncate(s,n){return s&&s.length>n?s.slice(0,n)+'…':s||'';}
+function resetTool(){
+  document.getElementById('results').style.display='none';
+  document.getElementById('results').innerHTML='';
+  document.getElementById('heroSection').style.display='';
+  document.getElementById('uploadSection').style.display='';
+  document.getElementById('howSection').style.display='';
+  document.getElementById('fileInput').value='';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('drag-over');});
+dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('drag-over');handleFile(e.dataTransfer.files[0]);});
+fileInput.addEventListener('change',()=>handleFile(fileInput.files[0]));
+</script>
+
+
+<div class="repair-modal-overlay" id="repairModalOverlay">
+  <div class="repair-modal">
+    <button class="repair-modal-close" id="repairModalClose">&#x2715;</button>
+    <div class="repair-modal-tag" id="repairModalTag"></div>
+    <div class="repair-modal-title" id="repairModalTitle"></div>
+    <div class="repair-modal-video" id="repairModalVideo"></div>
+    <div class="repair-modal-section">
+      <h4>What this means</h4>
+      <p id="repairModalWhat"></p>
+    </div>
+    <div class="repair-modal-section">
+      <h4>Repair steps</h4>
+      <ol class="repair-modal-steps" id="repairModalSteps"></ol>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+var REPAIR = {
+  'Repackage':{
+    tag:'🔴 Priority 1 — Repackage',tagColor:'var(--red)',
+    what:'This video has enough impressions to generate data but CTR is below 2.5%. The algorithm is serving it but viewers are not clicking. The title and thumbnail are not converting.',
+    steps:['Open this video in YouTube Studio → Analytics → Reach tab','Check CTR over time — is it flat or declining?','Write 3 new title variations using a stronger hook or specific number','Create a new thumbnail — swap face expression, change text, increase contrast','A/B test the new thumbnail using YouTube built-in A/B Testing','Do not touch the video content — this is a packaging problem']
+  },
+  'Improve CTR':{
+    tag:'🟡 Priority 2 — Improve CTR',tagColor:'var(--yellow)',
+    what:'CTR is between 2.5% and 4% with solid impressions. The video is being served but underperforming on click-through. Small improvements to title or thumbnail can push this into the performing range.',
+    steps:['Review the thumbnail — does it communicate a clear benefit or outcome?','Check the title — is the hook in the first 40 characters?','Compare this thumbnail to your highest CTR video on the channel shelf','Test one variable at a time: either title or thumbnail, not both','Target: get CTR above 4% to exit this status']
+  },
+  'Boost':{
+    tag:'🟠 Priority 3 — Boost',tagColor:'var(--amber)',
+    what:'CTR is strong but impressions are too low for the algorithm to learn. The content is working but not being served enough.',
+    steps:['Add this video link to end screens on 2-3 other videos','Pin a comment on your other videos mentioning this topic','Include this video URL in your next video description as a related resource','Check that the title uses keywords your audience searches for','Do not change the thumbnail — CTR is already working']
+  },
+  'Stable':{
+    tag:'🟠 Priority 3 — Stable',tagColor:'var(--amber)',
+    what:'This video is neither strongly performing nor clearly broken. It may be too new for a verdict, or sitting in a low-impression plateau. Monitor before making changes.',
+    steps:['Check days since publish — if under 14 days, wait for more data','Look at impressions — if under 100, the video has not been distributed yet','Verify the title contains a clear searchable topic','Check end screens — is this video linked from other videos?','Revisit in 30 days before deciding to repackage']
+  },
+  'Performing':{
+    tag:'🟢 Performing',tagColor:'var(--green)',
+    what:'This video is generating strong signal. VPI is above threshold and the algorithm is distributing it. Use this as a benchmark for future thumbnail and title decisions.',
+    steps:['Screenshot the thumbnail — use as visual reference for future videos','Copy the title structure — identify what made it work','Add end screen links from this video to lower-performing videos','Check Audience Retention — find where viewers drop off to improve future intros','Do not change anything on this video']
+  }
+};
+function showRepairModal(status, videoTitle) {
+  var data = REPAIR[status] || REPAIR['Stable'];
+  document.getElementById('repairModalTag').textContent = data.tag;
+  document.getElementById('repairModalTag').style.color = data.tagColor;
+  document.getElementById('repairModalTitle').textContent = status;
+  document.getElementById('repairModalVideo').textContent = videoTitle ? '📹 ' + videoTitle : '';
+  document.getElementById('repairModalWhat').textContent = data.what;
+  var el = document.getElementById('repairModalSteps');
+  el.innerHTML = data.steps.map(function(x){return '<li>'+x+'</li>';}).join('');
+  document.getElementById('repairModalOverlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeRepairModal() {
+  document.getElementById('repairModalOverlay').classList.remove('active');
+  document.body.style.overflow = '';
+}
+// Event delegation — handles dynamically generated pills
+document.addEventListener('click', function(e) {
+  var pill = e.target.closest ? e.target.closest('.pill-clickable') : null;
+  if (pill) { showRepairModal(pill.dataset.status, pill.dataset.title); return; }
+  if (e.target.id === 'repairModalOverlay' || e.target.id === 'repairModalClose') closeRepairModal();
+});
+document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeRepairModal(); });
+})();
+</script>
 
 <script>
 const SUPABASE_URL = 'https://htagojtlqatnagjsydnv.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_dWO-jisLPddhxfIwcKeS8g_JLFi2tSb';
-let _pendingFile = null;
-let _clientId = null;
 async function postDiagnosticRun(scoreData) {
   try {
     await fetch(SUPABASE_URL + '/rest/v1/diagnostic_runs', {
       method: 'POST',
       headers: {'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal'},
-      body: JSON.stringify({client_id: _clientId, signal_score: scoreData.total, ctr_signal: scoreData.ctr, impression_depth: scoreData.impressions, vpi: scoreData.vpi, velocity: scoreData.velocity, avg_ctr: scoreData.avgCtr, total_views: scoreData.totalViews, total_impressions: scoreData.totalImpressions, videos_analyzed: scoreData.videosAnalyzed, primary_constraint: scoreData.primaryConstraint})
+      body: JSON.stringify({signal_score: scoreData.total, ctr_signal: scoreData.ctr, impression_depth: scoreData.impressions, vpi: scoreData.vpi, velocity: scoreData.velocity, avg_ctr: scoreData.avgCtr, total_views: scoreData.totalViews, total_impressions: scoreData.totalImpressions, videos_analyzed: scoreData.videosAnalyzed, primary_constraint: scoreData.primaryConstraint})
     });
-    console.log('Diagnostic run saved');
+    console.log('Run saved to Supabase');
   } catch(e) { console.warn('Supabase post failed:', e); }
 }
-async function submitIntake() {
-  const name = document.getElementById('intakeName').value.trim();
-  const email = document.getElementById('intakeEmail').value.trim();
-  document.getElementById('intakeOverlay').classList.remove('active');
-  if (name && email) {
-    try {
-      const res = await fetch(SUPABASE_URL + '/rest/v1/clients', {
-        method: 'POST',
-        headers: {'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=representation'},
-        body: JSON.stringify({name: name, email: email, status: 'active'})
-      });
-      if (res.ok) { const d = await res.json(); _clientId = (d[0] && d[0].id) || null; }
-    } catch(e) { console.warn('Client save failed:', e); }
-  }
-  if (_pendingFile) handleFile(_pendingFile);
-}
-document.addEventListener('DOMContentLoaded', function() {
-  document.getElementById('intakeSubmit').addEventListener('click', submitIntake);
-  document.getElementById('intakeSkip').addEventListener('click', function() {
-    _clientId = null;
-    document.getElementById('intakeOverlay').classList.remove('active');
-    if (_pendingFile) handleFile(_pendingFile);
-  });
-});
 </script>
 </body>
