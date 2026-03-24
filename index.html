@@ -7,8 +7,72 @@
 <title>Pressure Tested — Signal Diagnostic</title>
 <link rel="preconnect" href="https://fonts.googleapis.com/">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Barlow+Condensed:wght@400;700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js">
+// Supabase integration
+const SUPABASE_URL = 'https://htagojtlqatnagjsydnv.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_dWO-jisLPddhxfIwcKeS8g_JLFi2tSb';
+
+async function postDiagnosticRun(scoreData) {
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/diagnostic_runs`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        signal_score: scoreData.total,
+        ctr_signal: scoreData.ctr,
+        impression_depth: scoreData.impressions,
+        vpi: scoreData.vpi,
+        velocity: scoreData.velocity,
+        avg_ctr: scoreData.avgCtr,
+        total_views: scoreData.totalViews,
+        total_impressions: scoreData.totalImpressions,
+        videos_analyzed: scoreData.videosAnalyzed,
+        primary_constraint: scoreData.primaryConstraint
+      })
+    });
+    console.log('Diagnostic run saved to Supabase');
+  } catch(e) {
+    console.warn('Supabase post failed:', e);
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
+// Supabase integration
+const SUPABASE_URL = 'https://htagojtlqatnagjsydnv.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_dWO-jisLPddhxfIwcKeS8g_JLFi2tSb';
+
+async function postDiagnosticRun(scoreData) {
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/diagnostic_runs`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        signal_score: scoreData.total,
+        ctr_signal: scoreData.ctr,
+        impression_depth: scoreData.impressions,
+        vpi: scoreData.vpi,
+        velocity: scoreData.velocity,
+        avg_ctr: scoreData.avgCtr,
+        total_views: scoreData.totalViews,
+        total_impressions: scoreData.totalImpressions,
+        videos_analyzed: scoreData.videosAnalyzed,
+        primary_constraint: scoreData.primaryConstraint
+      })
+    });
+    console.log('Diagnostic run saved to Supabase');
+  } catch(e) {
+    console.warn('Supabase post failed:', e);
+  }
+}</script>
 <style>
 :root {
   --navy-900:#0a0f1e;--navy-800:#0f1628;--navy-700:#162035;--navy-600:#1a2744;--navy-500:#243560;
@@ -422,6 +486,8 @@ async function handleFile(file) {
     const rows = parseCSV(text);
     const data = scoreChannel(rows, [], []);
     renderResults(data);
+    postDiagnosticRun({ total: data.totalScore, ctr: data.ctrScore, impressions: data.impScore, vpi: data.vpiScore, velocity: data.velScore, avgCtr: data.avgCTR, totalViews: data.totalViews, totalImpressions: data.totalImpressions, videosAnalyzed: data.vids ? data.vids.length : 0, primaryConstraint: data.primaryConstraint });
+    postDiagnosticRun({ total: data.totalScore, ctr: data.ctrScore, impressions: data.impScore, vpi: data.vpiScore, velocity: data.velScore, avgCtr: data.avgCTR, totalViews: data.totalViews, totalImpressions: data.totalImpressions, videosAnalyzed: data.vids?.length || 0, primaryConstraint: data.primaryConstraint });
   } else {
     alert('Please upload a .zip or .csv file from YouTube Studio.');
   }
@@ -456,6 +522,8 @@ async function handleZip(file) {
     const totalsRows = totalsText ? parseCSV(totalsText) : [];
     const data = scoreChannel(tableRows, chartRows, totalsRows);
     renderResults(data);
+    postDiagnosticRun({ total: data.totalScore, ctr: data.ctrScore, impressions: data.impScore, vpi: data.vpiScore, velocity: data.velScore, avgCtr: data.avgCTR, totalViews: data.totalViews, totalImpressions: data.totalImpressions, videosAnalyzed: data.vids ? data.vids.length : 0, primaryConstraint: data.primaryConstraint });
+    postDiagnosticRun({ total: data.totalScore, ctr: data.ctrScore, impressions: data.impScore, vpi: data.vpiScore, velocity: data.velScore, avgCtr: data.avgCTR, totalViews: data.totalViews, totalImpressions: data.totalImpressions, videosAnalyzed: data.vids?.length || 0, primaryConstraint: data.primaryConstraint });
   } catch(e) {
     alert('Could not read ZIP file: ' + e.message);
   }
@@ -1092,7 +1160,39 @@ dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.a
 dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('drag-over'));
 dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('drag-over');handleFile(e.dataTransfer.files[0]);});
 fileInput.addEventListener('change',()=>handleFile(fileInput.files[0]));
-</script>
+
+// Supabase integration
+const SUPABASE_URL = 'https://htagojtlqatnagjsydnv.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_dWO-jisLPddhxfIwcKeS8g_JLFi2tSb';
+
+async function postDiagnosticRun(scoreData) {
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/diagnostic_runs`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        signal_score: scoreData.total,
+        ctr_signal: scoreData.ctr,
+        impression_depth: scoreData.impressions,
+        vpi: scoreData.vpi,
+        velocity: scoreData.velocity,
+        avg_ctr: scoreData.avgCtr,
+        total_views: scoreData.totalViews,
+        total_impressions: scoreData.totalImpressions,
+        videos_analyzed: scoreData.videosAnalyzed,
+        primary_constraint: scoreData.primaryConstraint
+      })
+    });
+    console.log('Diagnostic run saved to Supabase');
+  } catch(e) {
+    console.warn('Supabase post failed:', e);
+  }
+}</script>
 
 
 <div class="repair-modal-overlay" id="repairModalOverlay">
@@ -1165,5 +1265,37 @@ document.addEventListener('click', function(e) {
 });
 document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeRepairModal(); });
 })();
-</script>
+
+// Supabase integration
+const SUPABASE_URL = 'https://htagojtlqatnagjsydnv.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_dWO-jisLPddhxfIwcKeS8g_JLFi2tSb';
+
+async function postDiagnosticRun(scoreData) {
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/diagnostic_runs`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        signal_score: scoreData.total,
+        ctr_signal: scoreData.ctr,
+        impression_depth: scoreData.impressions,
+        vpi: scoreData.vpi,
+        velocity: scoreData.velocity,
+        avg_ctr: scoreData.avgCtr,
+        total_views: scoreData.totalViews,
+        total_impressions: scoreData.totalImpressions,
+        videos_analyzed: scoreData.videosAnalyzed,
+        primary_constraint: scoreData.primaryConstraint
+      })
+    });
+    console.log('Diagnostic run saved to Supabase');
+  } catch(e) {
+    console.warn('Supabase post failed:', e);
+  }
+}</script>
 </body>
