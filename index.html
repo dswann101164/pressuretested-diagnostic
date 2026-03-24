@@ -58,11 +58,13 @@ async function submitIntake() {
   }
   if (_pendingFile) handleFile(_pendingFile);
 }
-document.getElementById('intakeSubmit').addEventListener('click', submitIntake);
-document.getElementById('intakeSkip').addEventListener('click', () => {
-  _clientId = null;
-  document.getElementById('intakeOverlay').classList.remove('active');
-  if (_pendingFile) handleFile(_pendingFile);
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('intakeSubmit').addEventListener('click', submitIntake);
+  document.getElementById('intakeSkip').addEventListener('click', () => {
+    _clientId = null;
+    document.getElementById('intakeOverlay').classList.remove('active');
+    if (_pendingFile) handleFile(_pendingFile);
+  });
 });
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
