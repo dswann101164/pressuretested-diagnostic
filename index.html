@@ -8,10 +8,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com/">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Barlow+Condensed:wght@400;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js">
-// Supabase integration
-const SUPABASE_URL = 'https://htagojtlqatnagjsydnv.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_dWO-jisLPddhxfIwcKeS8g_JLFi2tSb';
-
 async function postDiagnosticRun(scoreData) {
   try {
     await fetch(`${SUPABASE_URL}/rest/v1/diagnostic_runs`, {
@@ -68,10 +64,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
-// Supabase integration
-const SUPABASE_URL = 'https://htagojtlqatnagjsydnv.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_dWO-jisLPddhxfIwcKeS8g_JLFi2tSb';
-
 async function postDiagnosticRun(scoreData) {
   try {
     await fetch(`${SUPABASE_URL}/rest/v1/diagnostic_runs`, {
@@ -1211,10 +1203,6 @@ dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('drag-over')
 dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('drag-over');handleFile(e.dataTransfer.files[0]);});
 fileInput.addEventListener('change',()=>{_pendingFile=fileInput.files[0];if(_pendingFile){document.getElementById('intakeOverlay').classList.add('active');document.getElementById('intakeName').focus();}});
 
-// Supabase integration
-const SUPABASE_URL = 'https://htagojtlqatnagjsydnv.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_dWO-jisLPddhxfIwcKeS8g_JLFi2tSb';
-
 async function postDiagnosticRun(scoreData) {
   try {
     await fetch(`${SUPABASE_URL}/rest/v1/diagnostic_runs`, {
@@ -1315,10 +1303,6 @@ document.addEventListener('click', function(e) {
 });
 document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeRepairModal(); });
 })();
-
-// Supabase integration
-const SUPABASE_URL = 'https://htagojtlqatnagjsydnv.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_dWO-jisLPddhxfIwcKeS8g_JLFi2tSb';
 
 async function postDiagnosticRun(scoreData) {
   try {
