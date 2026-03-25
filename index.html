@@ -1235,7 +1235,7 @@ async function submitIntake() {
             'Content-Type': 'application/json',
             'Prefer': 'return=representation'
           },
-          body: JSON.stringify({name: name, email: email, channel_url: (document.getElementById('intakeChannelUrl')?.value.trim() || null), status: 'active'})
+          body: JSON.stringify({name: name, email: email, channel_url: (document.getElementById('intakeChannelUrl')?.value.trim() || null), status: 'active', coach_id: '3333715e-f40d-4d89-9cf7-aa6657daf847'})
         });
         if (res.ok) {
           var d = await res.json();
