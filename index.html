@@ -1201,6 +1201,14 @@ async function postDiagnosticRun(scoreData) {
       body: JSON.stringify({client_id: _clientId, signal_score: scoreData.total, ctr_signal: scoreData.ctr, impression_depth: scoreData.impressions, vpi: scoreData.vpi, velocity: scoreData.velocity, avg_ctr: scoreData.avgCtr, total_views: scoreData.totalViews, total_impressions: scoreData.totalImpressions, videos_analyzed: scoreData.videosAnalyzed, primary_constraint: scoreData.primaryConstraint})
     });
     console.log('Run saved to Supabase');
+    // Also update client signal_score so dashboard reflects latest run
+    if (_clientId) {
+      await fetch(SUPABASE_URL + '/rest/v1/clients?id=eq.' + _clientId, {
+        method: 'PATCH',
+        headers: {'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json'},
+        body: JSON.stringify({signal_score: scoreData.total})
+      });
+    }
   } catch(e) { console.warn('Supabase post failed:', e); }
 }
 let _pendingFile = null;
