@@ -1255,10 +1255,21 @@ async function submitIntake() {
   if (_pendingFile) {
     await handleFile(_pendingFile);
   }
-  // Post diagnostic run AFTER file is scored and client ID is set
-  if (window._pendingScore) {
-    await postDiagnosticRun(window._pendingScore);
-    window._pendingScore = null;
+  // Build scoreData from _lastData (populated by renderResults)
+  if (window._lastData) {
+    var sd = window._lastData;
+    await postDiagnosticRun({
+      total: sd.totalScore,
+      ctr: sd.ctrScore,
+      impressions: sd.impScore,
+      vpi: sd.vpiScore,
+      velocity: sd.velScore,
+      avgCtr: sd.avgCTR,
+      totalViews: sd.totalViews,
+      totalImpressions: sd.totalImpressions,
+      videosAnalyzed: sd.vids ? sd.vids.length : 0,
+      primaryConstraint: sd.constraint ? sd.constraint.name : ''
+    });
   }
 }
 
