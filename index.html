@@ -1130,10 +1130,23 @@ function connectYouTube() {
 // Handle OAuth return data
 (function() {
   var params = new URLSearchParams(window.location.search);
+  var oauthSession = params.get('oauth_session');
   var oauthData = params.get('oauth_data');
   var oauthError = params.get('oauth_error');
   if (oauthError) {
     alert('YouTube connection failed: ' + oauthError);
+    return;
+  }
+  if (oauthSession) {
+    fetch('https://htagojtlqatnagjsydnv.supabase.co/functions/v1/youtube-oauth-callback?session_id=' + oauthSession)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data && (data.channel || data.videoStats)) {
+          window._oauthData = data;
+          processOAuthData(data);
+        }
+      })
+      .catch(function(e) { console.error('Session fetch error', e); });
     return;
   }
   if (oauthData) {
