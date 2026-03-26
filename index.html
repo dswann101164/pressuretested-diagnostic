@@ -1140,8 +1140,8 @@ function connectYouTube() {
   if (oauthSession) {
     fetch('https://htagojtlqatnagjsydnv.supabase.co/rest/v1/oauth_sessions?id=eq.' + oauthSession + '&select=payload', {
       headers: {
-        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0YWdvanRscWF0bmFnanN5ZG52Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIyMTU0MDUsImV4cCI6MjA1Nzc5MTQwNX0.zr4BpqIEDIiLVRN6wy4q3usNp0S1sLhBzl_jzYoq0cI',
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0YWdvanRscWF0bmFnanN5ZG52Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIyMTU0MDUsImV4cCI6MjA1Nzc5MTQwNX0.zr4BpqIEDIiLVRN6wy4q3usNp0S1sLhBzl_jzYoq0cI'
+        'apikey': 'sb_publishable_dWO-jisLPddhxfIwcKeS8g_JLFi2tSb',
+        'Authorization': 'Bearer sb_publishable_dWO-jisLPddhxfIwcKeS8g_JLFi2tSb'
       }
     })
       .then(function(r) { return r.json(); })
