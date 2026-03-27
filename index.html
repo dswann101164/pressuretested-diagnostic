@@ -1166,7 +1166,6 @@ function connectYouTube() {
 
 function processOAuthData(data) {
   if (!data || !data.videoStats || !data.videoStats.length) return;
-  // Build watch time map from analytics
   var watchMap = {};
   if (data.analytics && data.analytics.rows) {
     var cols = (data.analytics.columnHeaders || []).map(function(h){return h.name;});
@@ -1187,6 +1186,14 @@ function processOAuthData(data) {
       var dm = v.contentDetails.duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
       if (dm) durSec = (parseInt(dm[1])||0)*3600 + (parseInt(dm[2])||0)*60 + (parseInt(dm[3])||0);
     }
+    var vpiV = imps > 0 ? views / imps : 0;
+    var status, statusClass, priorityNum;
+    if (vpiV >= 0.4) { status = 'Performing'; statusClass = 'pill-green'; priorityNum = 4; }
+    else if (imps > 200 && ctr < 2.5) { status = 'Repackage'; statusClass = 'pill-red'; priorityNum = 1; }
+    else if (imps > 200 && ctr < 4) { status = 'Improve CTR'; statusClass = 'pill-yellow'; priorityNum = 2; }
+    else if (imps < 50 && ctr > 7) { status = 'Boost'; statusClass = 'pill-amber'; priorityNum = 3; }
+    else if (ctr >= 4 && vpiV >= 0.2) { status = 'Performing'; statusClass = 'pill-green'; priorityNum = 4; }
+    else { status = 'Stable'; statusClass = 'pill-amber'; priorityNum = 3; }
     return {
       'Video title': v.snippet ? v.snippet.title : v.id,
       'Video publish time': v.snippet ? v.snippet.publishedAt : '',
@@ -1195,16 +1202,55 @@ function processOAuthData(data) {
       subs: 0,
       retPct: durSec > 0 && watchMin > 0 && views > 0 ? Math.min(100, Math.round(watchMin*60/durSec/views*100)) : 0,
       avgViewSec: views > 0 && watchMin > 0 ? Math.round(watchMin*60/views) : 0,
-      durSec: durSec,
-      vpiV: imps > 0 ? views / imps : 0,
+      durSec: durSec, vpiV: vpiV,
       momentum: 'new', momPct: null, momFeb: 0, momMar: 0,
-      status: ctr >= 6 ? 'Performing' : ctr >= 4 ? 'Stable' : ctr >= 2.5 ? 'Improve CTR' : 'Repackage'
+      status: status, statusClass: statusClass, priorityNum: priorityNum
     };
   });
-  if (vids.length > 0) {
-    var channel = data.channel || {};
-    renderResults(vids, channel.title || 'Your Channel', channel.thumbnail || '');
-  }
+  if (!vids.length) return;
+  vids.sort(function(a, b) { return a.priorityNum - b.priorityNum; });
+
+  var totalViews = vids.reduce(function(s, v) { return s + v.views; }, 0);
+  var totalImpressions = vids.reduce(function(s, v) { return s + v.imps; }, 0);
+  var avgCTR = totalImpressions > 0
+    ? vids.reduce(function(s, v) { return s + v.ctr * v.imps; }, 0) / totalImpressions : 0;
+  var vpi = totalImpressions > 0 ? totalViews / totalImpressions : 0;
+
+  var ctrScore = avgCTR < 2 ? 5 : avgCTR < 3 ? 10 : avgCTR < 4 ? 15 : avgCTR < 5 ? 20 : avgCTR < 8 ? 26 : 30;
+  var impsPerVid = vids.length > 0 ? totalImpressions / vids.length : 0;
+  var impScore = impsPerVid < 50 ? 5 : impsPerVid < 100 ? 10 : impsPerVid < 200 ? 16 : impsPerVid < 400 ? 20 : 25;
+  var vpiScore = vpi < 0.1 ? 5 : vpi < 0.2 ? 10 : vpi < 0.35 ? 16 : vpi < 0.5 ? 20 : 25;
+  var velScore = vids.length < 3 ? 5 : vids.length < 6 ? 10 : vids.length < 10 ? 15 : 20;
+  var totalScore = ctrScore + impScore + vpiScore + velScore;
+
+  var scoreDefs = [
+    { name: 'CTR signal', score: ctrScore, max: 30, fix: 'Your average CTR is below the healthy 4–8% range. YouTube is testing your videos but viewers aren\'t clicking. The issue is thumbnail and title packaging — they aren\'t matching what your target audience expects in the browse feed.' },
+    { name: 'Impression depth', score: impScore, max: 25, fix: 'YouTube isn\'t distributing your content widely enough yet. Fix CTR first — impression volume follows.' },
+    { name: 'Views per impression', score: vpiScore, max: 25, fix: 'Your VPI is low. Focus on high-impression, low-click videos first.' },
+    { name: 'Upload velocity', score: velScore, max: 20, fix: 'The algorithm needs consistent data. More focused uploads = faster channel classification.' },
+  ];
+  scoreDefs.sort(function(a, b) { return (a.score / a.max) - (b.score / b.max); });
+
+  var titles = vids.map(function(v) { return v['Video title'] || ''; });
+  var detectedNiche = detectNiche(titles);
+  var alignScore = calcAlignment(_L1.niche, detectedNiche);
+
+  var dataObj = {
+    vids: vids, totalViews: totalViews, totalImpressions: totalImpressions,
+    avgCTR: avgCTR, vpi: vpi, totalScore: totalScore,
+    ctrScore: ctrScore, impScore: impScore, vpiScore: vpiScore, velScore: velScore,
+    constraint: scoreDefs[0], totalsMonths: [], hasMomentum: false,
+    detectedNiche: detectedNiche, alignScore: alignScore
+  };
+  window._lastData = dataObj;
+  renderResults(dataObj);
+
+  postDiagnosticRun({
+    total: totalScore, ctr: ctrScore, impressions: impScore, vpi: vpiScore,
+    velocity: velScore, avgCtr: avgCTR, totalViews: totalViews,
+    totalImpressions: totalImpressions, videosAnalyzed: vids.length,
+    primaryConstraint: scoreDefs[0].name
+  });
 }
 
 dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('drag-over');});
