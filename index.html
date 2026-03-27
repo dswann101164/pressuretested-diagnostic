@@ -688,7 +688,8 @@ function build7DayPlan(vids, data) {
 function renderResults(data) {
   const { vids, totalViews, totalImpressions, avgCTR, vpi,
           totalScore, ctrScore, impScore, vpiScore, velScore,
-          constraint, totalsMonths, hasMomentum, detectedNiche, alignScore } = data;
+          constraint, totalsMonths, hasMomentum, detectedNiche, alignScore,
+          isQuickScan } = data;
 
   const scoreColor = totalScore < 30 ? 'score-danger' : totalScore < 50 ? 'score-warning' : totalScore < 70 ? 'score-ok' : 'score-good';
   const logoSrc = document.querySelector('.logo img').src;
@@ -791,6 +792,15 @@ function renderResults(data) {
         <div style="font-family:var(--mono);font-size:11px;color:var(--amber);margin-top:6px;">Projected after repairs: <strong>${Math.min(100, totalScore + (ctrScore < 15 ? 15 : 0) + (impScore < 15 ? 8 : 0) + (vpiScore < 15 ? 8 : 0) + (velScore < 15 ? 5 : 0))}/100</strong></div>
       </div>
     </div>
+
+    ${isQuickScan ? `
+    <div style="background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.35);border-left:4px solid #C9A84C;border-radius:6px;padding:1rem 1.25rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+      <div>
+        <div style="font-family:var(--mono);font-size:10px;color:#C9A84C;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">&#9889; Quick Scan &mdash; YouTube API</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.8);">Scored on <strong>watch time &amp; velocity only.</strong> CTR and impression data require a ZIP export from YouTube Studio.</div>
+      </div>
+      <a href="#uploadSection" onclick="document.getElementById('results').style.display='none';document.getElementById('heroSection').style.display='';document.getElementById('uploadSection').style.display='';document.getElementById('howSection').style.display='';window.scrollTo({top:0,behavior:'smooth'});return false;" style="white-space:nowrap;font-family:var(--mono);font-size:11px;color:#C9A84C;border:1px solid rgba(201,168,76,0.4);border-radius:4px;padding:6px 12px;text-decoration:none;flex-shrink:0;">Upload ZIP for full score &rarr;</a>
+    </div>` : ''}
 
     ${pulseHTML}
 
@@ -1167,40 +1177,34 @@ function connectYouTube() {
 function processOAuthData(data) {
   if (!data || !data.videoStats || !data.videoStats.length) return;
   var watchMap = {};
-  var impressionsMap = {};
-  var ctrMap = {};
   if (data.analytics && data.analytics.rows) {
     var cols = (data.analytics.columnHeaders || []).map(function(h){return h.name;});
     var vidIdx = cols.indexOf('video');
     var watchIdx = cols.indexOf('estimatedMinutesWatched');
-    var impIdx = cols.indexOf('impressions');
-    var ctrIdx = cols.indexOf('impressionsClickThroughRate');
     data.analytics.rows.forEach(function(row) {
       var id = row[vidIdx];
       if (!id) return;
       if (watchIdx >= 0) watchMap[id] = parseFloat(row[watchIdx]) || 0;
-      if (impIdx >= 0) impressionsMap[id] = parseFloat(row[impIdx]) || 0;
-      if (ctrIdx >= 0) ctrMap[id] = parseFloat(row[ctrIdx]) || 0;
     });
   }
   var vids = data.videoStats.map(function(v) {
     var stats = v.statistics || {};
     var views = parseInt(stats.viewCount) || 0;
     var watchMin = watchMap[v.id] || 0;
-    var imps = impressionsMap[v.id] > 0 ? impressionsMap[v.id] : (views > 0 ? Math.round(views * 15) : 100);
-    var ctr = ctrMap[v.id] > 0 ? parseFloat(ctrMap[v.id].toFixed(2)) : parseFloat(((views / imps) * 100).toFixed(2));
+    var imps = 0; // not available via API — CTR/impressions require ZIP export
+    var ctr = 0;
     var durSec = 0;
     if (v.contentDetails && v.contentDetails.duration) {
       var dm = v.contentDetails.duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
       if (dm) durSec = (parseInt(dm[1])||0)*3600 + (parseInt(dm[2])||0)*60 + (parseInt(dm[3])||0);
     }
-    var vpiV = imps > 0 ? views / imps : 0;
+    var vpiV = 0; // not available without real impressions
+    // Status based on watch time and views only in Quick Scan mode
     var status, statusClass, priorityNum;
-    if (vpiV >= 0.4) { status = 'Performing'; statusClass = 'pill-green'; priorityNum = 4; }
-    else if (imps > 200 && ctr < 2.5) { status = 'Repackage'; statusClass = 'pill-red'; priorityNum = 1; }
-    else if (imps > 200 && ctr < 4) { status = 'Improve CTR'; statusClass = 'pill-yellow'; priorityNum = 2; }
-    else if (imps < 50 && ctr > 7) { status = 'Boost'; statusClass = 'pill-amber'; priorityNum = 3; }
-    else if (ctr >= 4 && vpiV >= 0.2) { status = 'Performing'; statusClass = 'pill-green'; priorityNum = 4; }
+    var avgViewMin = views > 0 && watchMin > 0 ? watchMin / views : 0;
+    if (views >= 50 && avgViewMin >= 3) { status = 'Performing'; statusClass = 'pill-green'; priorityNum = 4; }
+    else if (views >= 20 && avgViewMin >= 2) { status = 'Stable'; statusClass = 'pill-amber'; priorityNum = 3; }
+    else if (views < 10) { status = 'Low Views'; statusClass = 'pill-red'; priorityNum = 1; }
     else { status = 'Stable'; statusClass = 'pill-amber'; priorityNum = 3; }
     return {
       'Video title': v.snippet ? v.snippet.title : v.id,
@@ -1224,18 +1228,21 @@ function processOAuthData(data) {
     ? vids.reduce(function(s, v) { return s + v.ctr * v.imps; }, 0) / totalImpressions : 0;
   var vpi = totalImpressions > 0 ? totalViews / totalImpressions : 0;
 
-  var ctrScore = avgCTR < 2 ? 5 : avgCTR < 3 ? 10 : avgCTR < 4 ? 15 : avgCTR < 5 ? 20 : avgCTR < 8 ? 26 : 30;
-  var impsPerVid = vids.length > 0 ? totalImpressions / vids.length : 0;
-  var impScore = impsPerVid < 50 ? 5 : impsPerVid < 100 ? 10 : impsPerVid < 200 ? 16 : impsPerVid < 400 ? 20 : 25;
-  var vpiScore = vpi < 0.1 ? 5 : vpi < 0.2 ? 10 : vpi < 0.35 ? 16 : vpi < 0.5 ? 20 : 25;
-  var velScore = vids.length < 3 ? 5 : vids.length < 6 ? 10 : vids.length < 10 ? 15 : 20;
-  var totalScore = ctrScore + impScore + vpiScore + velScore;
+  // Quick Scan: score only on what the API actually provides
+  // CTR and VPI require ZIP export — not available via YouTube API
+  var totalViewsAll = vids.reduce(function(s,v){return s+v.views;}, 0);
+  var totalWatchMin = vids.reduce(function(s,v){return s+v.watchHours*60;}, 0);
+  var avgViewMin = totalViewsAll > 0 ? totalWatchMin / totalViewsAll : 0;
+  // Watch time score (proxy for retention) out of 50
+  var watchScore = avgViewMin < 1 ? 5 : avgViewMin < 2 ? 15 : avgViewMin < 3 ? 25 : avgViewMin < 5 ? 35 : 50;
+  // Velocity score out of 50
+  var velScore = vids.length < 3 ? 10 : vids.length < 6 ? 20 : vids.length < 10 ? 35 : vids.length < 15 ? 42 : 50;
+  var totalScore = watchScore + velScore;
+  var ctrScore = 0; var impScore = 0; var vpiScore = 0;
 
   var scoreDefs = [
-    { name: 'CTR signal', score: ctrScore, max: 30, fix: 'Your average CTR is below the healthy 4–8% range. YouTube is testing your videos but viewers aren\'t clicking. The issue is thumbnail and title packaging — they aren\'t matching what your target audience expects in the browse feed.' },
-    { name: 'Impression depth', score: impScore, max: 25, fix: 'YouTube isn\'t distributing your content widely enough yet. Fix CTR first — impression volume follows.' },
-    { name: 'Views per impression', score: vpiScore, max: 25, fix: 'Your VPI is low. Focus on high-impression, low-click videos first.' },
-    { name: 'Upload velocity', score: velScore, max: 20, fix: 'The algorithm needs consistent data. More focused uploads = faster channel classification.' },
+    { name: 'Watch time depth', score: watchScore, max: 50, fix: 'Average watch time per view is low. Viewers are clicking away early. Fix your hook — the first 30 seconds determine whether viewers stay.' },
+    { name: 'Upload velocity', score: velScore, max: 50, fix: 'The algorithm needs consistent data. More focused uploads = faster channel classification.' },
   ];
   scoreDefs.sort(function(a, b) { return (a.score / a.max) - (b.score / b.max); });
 
@@ -1248,7 +1255,8 @@ function processOAuthData(data) {
     avgCTR: avgCTR, vpi: vpi, totalScore: totalScore,
     ctrScore: ctrScore, impScore: impScore, vpiScore: vpiScore, velScore: velScore,
     constraint: scoreDefs[0], totalsMonths: [], hasMomentum: false,
-    detectedNiche: detectedNiche, alignScore: alignScore
+    detectedNiche: detectedNiche, alignScore: alignScore,
+    isQuickScan: true, watchScore: watchScore
   };
   window._lastData = dataObj;
   renderResults(dataObj);
