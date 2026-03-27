@@ -789,7 +789,7 @@ function renderResults(data) {
       <div class="score-display">
         <div class="score-num ${scoreColor}">${totalScore}<span class="score-denom">/100</span></div>
         <div class="score-label">Signal score</div>
-        <div style="font-family:var(--mono);font-size:11px;color:var(--amber);margin-top:6px;">Projected after repairs: <strong>${Math.min(100, totalScore + (ctrScore < 15 ? 15 : 0) + (impScore < 15 ? 8 : 0) + (vpiScore < 15 ? 8 : 0) + (velScore < 15 ? 5 : 0))}/100</strong></div>
+        ${isQuickScan ? '' : `<div style="font-family:var(--mono);font-size:11px;color:var(--amber);margin-top:6px;">Projected after repairs: <strong>${Math.min(100, totalScore + (ctrScore < 15 ? 15 : 0) + (impScore < 15 ? 8 : 0) + (vpiScore < 15 ? 8 : 0) + (velScore < 15 ? 5 : 0))}/100</strong></div>`}
       </div>
     </div>
 
@@ -910,12 +910,15 @@ function renderResults(data) {
       <span class="score-breakdown-title">Score Breakdown</span>
       <span class="score-breakdown-total">${totalScore} / 100 total</span>
     </div>
-    ${[
+    ${(isQuickScan ? [
+      { name: 'Watch Time Depth', score: data.watchScore || 0, max: 50 },
+      { name: 'Upload Velocity',  score: velScore, max: 50 },
+    ] : [
       { name: 'CTR Signal',           score: ctrScore, max: 30 },
       { name: 'Impression Depth',     score: impScore, max: 25 },
       { name: 'Views Per Impression', score: vpiScore, max: 25 },
       { name: 'Upload Velocity',      score: velScore, max: 20 },
-    ].map(r => {
+    ]).map(r => {
       const pct = (r.score / r.max) * 100;
       const col = (r.score/r.max) >= 0.7 ? 'var(--green)' : (r.score/r.max) >= 0.45 ? 'var(--amber)' : 'var(--red)';
       return `<div class="score-breakdown-row">
