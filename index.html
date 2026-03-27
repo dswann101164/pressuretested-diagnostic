@@ -745,6 +745,7 @@ function renderResults(data) {
   const momHeader = hasMomentum ? '<th>Momentum</th>' : '';
 
   const tableRows = vids.map(v => {
+    const _qs = isQuickScan;
     let momCell = '';
     if (hasMomentum) {
       if (v.momentum === 'up') {
@@ -764,10 +765,7 @@ function renderResults(data) {
     return `<tr>
       <td class="title-cell" title="${esc(v['Video title'])}">${esc(v['Video title'])}</td>
       <td class="mono">${v.views.toLocaleString()}</td>
-      <td class="mono">${v.imps.toLocaleString()}</td>
-      <td class="mono">${Math.round(v.imps * v.ctr / 100)}</td>
-      <td class="mono" style="color:${v.ctr < 3 ? 'var(--red)' : v.ctr < 4 ? 'var(--yellow)' : 'var(--green)'}">${v.ctr.toFixed(2)}%</td>
-      <td class="mono" style="color:${v.vpiV >= 0.4 ? 'var(--green)' : v.vpiV >= 0.2 ? 'var(--amber)' : 'var(--text2)'}">${v.vpiV.toFixed(3)}</td>
+      ${_qs ? '' : `<td class="mono">${v.imps.toLocaleString()}</td><td class="mono">${Math.round(v.imps * v.ctr / 100)}</td><td class="mono" style="color:${v.ctr < 3 ? 'var(--red)' : v.ctr < 4 ? 'var(--yellow)' : 'var(--green)'}">${v.ctr.toFixed(2)}%</td><td class="mono" style="color:${v.vpiV >= 0.4 ? 'var(--green)' : v.vpiV >= 0.2 ? 'var(--amber)' : 'var(--text2)'}">${v.vpiV.toFixed(3)}</td>`}
       <td class="mono">${v.retPct > 0 ? v.retPct.toFixed(0)+'%' : '&mdash;'}</td>
       ${watchCell}
       ${subsCell}
@@ -821,9 +819,11 @@ function renderResults(data) {
 
     <div class="kpi-strip">
       <div class="kpi-card"><div class="kpi-val">${totalViews.toLocaleString()}</div><div class="kpi-label">Total views</div></div>
+      ${isQuickScan ? `
+      <div class="kpi-card" style="grid-column:span 3;background:rgba(201,168,76,0.04);border-color:rgba(201,168,76,0.2);"><div style="font-family:var(--mono);font-size:11px;color:rgba(255,255,255,0.4);padding-top:4px;">Impressions, CTR &amp; VPI not available via YouTube API &mdash; upload ZIP for full data</div></div>` : `
       <div class="kpi-card"><div class="kpi-val">${totalImpressions.toLocaleString()}</div><div class="kpi-label">Impressions</div></div>
       <div class="kpi-card"><div class="kpi-val" style="color:${avgCTR < 3 ? 'var(--red)' : avgCTR < 4 ? 'var(--yellow)' : 'var(--green)'}">${avgCTR.toFixed(2)}%</div><div class="kpi-label">Avg CTR</div></div>
-      <div class="kpi-card"><div class="kpi-val">${vpi.toFixed(3)}</div><div class="kpi-label">VPI</div></div>
+      <div class="kpi-card"><div class="kpi-val">${vpi.toFixed(3)}</div><div class="kpi-label">VPI</div></div>`}
       <div class="kpi-card"><div class="kpi-val">${vids.length}</div><div class="kpi-label">Videos</div></div>
     </div>
 
@@ -847,7 +847,7 @@ function renderResults(data) {
       <div class="vt-header"><span class="vt-title">All videos &mdash; signal breakdown</span></div>
       <div class="table-scroll">
         <table>
-          <thead><tr><th>Video</th><th>Views</th><th>Impressions</th><th>Clicks</th><th>CTR</th><th>VPI</th><th>Retention</th><th>Watch Time</th><th>Subs</th>${momHeader}<th>Status</th></tr></thead>
+          <thead><tr><th>Video</th><th>Views</th>${isQuickScan ? '' : '<th>Impressions</th><th>Clicks</th><th>CTR</th><th>VPI</th>'}<th>Retention</th><th>Watch Time</th><th>Subs</th>${momHeader}<th>Status</th></tr></thead>
           <tbody>${tableRows}</tbody>
         </table>
       </div>
