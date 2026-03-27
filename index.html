@@ -884,6 +884,10 @@ function renderResults(data) {
         </div>
       </div>
       <button class="reset-btn" onclick="resetTool()">&#x2190; Analyze a different channel</button>
+      <button class="dl-main" style="background:var(--amber);color:#0a0f1e;border:none;" onclick="generateScoreCard()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+        Share Score Card
+      </button>
     </div>`;
 
   // Inject avatar separately &mdash; avoids 167k base64 string inside template literal
@@ -1115,6 +1119,150 @@ function buildRepairCards(vids, data) {
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function truncate(s,n){return s&&s.length>n?s.slice(0,n)+'&#x2026;':s||'';}
+
+function generateScoreCard() {
+  var d = window._lastData;
+  if (!d) return;
+
+  var W = 1200, H = 630;
+  var canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  var ctx = canvas.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#0D1B2A';
+  ctx.fillRect(0, 0, W, H);
+
+  // Subtle radial glow top-left
+  var grd = ctx.createRadialGradient(0, 0, 0, 0, 0, 700);
+  grd.addColorStop(0, 'rgba(201,168,76,0.07)');
+  grd.addColorStop(1, 'rgba(201,168,76,0)');
+  ctx.fillStyle = grd;
+  ctx.fillRect(0, 0, W, H);
+
+  // Gold top border
+  ctx.fillStyle = '#C9A84C';
+  ctx.fillRect(0, 0, W, 5);
+
+  // Gold bottom border
+  ctx.fillRect(0, H - 5, W, 5);
+
+  // Left panel divider
+  ctx.fillStyle = 'rgba(201,168,76,0.2)';
+  ctx.fillRect(480, 60, 1, H - 120);
+
+  // ── LEFT PANEL: Score ──
+  var scoreColor = d.totalScore < 30 ? '#e05252' : d.totalScore < 50 ? '#e8c840' : d.totalScore < 70 ? '#C9A84C' : '#4caf7d';
+
+  // "SIGNAL SCORE" label
+  ctx.fillStyle = 'rgba(255,255,255,0.45)';
+  ctx.font = '500 18px "IBM Plex Mono", monospace';
+  ctx.letterSpacing = '0.15em';
+  ctx.fillText('SIGNAL SCORE', 60, 130);
+
+  // Big score number
+  ctx.fillStyle = scoreColor;
+  ctx.font = '800 220px "Barlow Condensed", sans-serif';
+  ctx.fillText(d.totalScore, 60, 360);
+
+  // /100
+  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.font = '700 80px "Barlow Condensed", sans-serif';
+  ctx.fillText('/100', 60 + ctx.measureText(String(d.totalScore)).width * (80/220) + 10, 360);
+
+  // Score label workaround — measure at actual size
+  ctx.font = '800 220px "Barlow Condensed", sans-serif';
+  var scoreW = ctx.measureText(String(d.totalScore)).width;
+  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.font = '700 80px "Barlow Condensed", sans-serif';
+  ctx.fillText('/100', 60 + scoreW + 8, 360);
+
+  // Mode label
+  var modeLabel = d.isQuickScan ? 'QUICK SCAN — YOUTUBE API' : 'FULL DIAGNOSTIC — ZIP EXPORT';
+  ctx.fillStyle = d.isQuickScan ? '#C9A84C' : '#4caf7d';
+  ctx.font = '500 15px "IBM Plex Mono", monospace';
+  ctx.fillText(modeLabel, 60, 410);
+
+  // Channel name
+  var channelName = (d.vids && d.vids.length > 0) ? 'PRESSURE TESTED' : 'YOUR CHANNEL';
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '700 36px "Barlow Condensed", sans-serif';
+  ctx.fillText(channelName.toUpperCase(), 60, 470);
+
+  // Videos count
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.font = '400 16px "IBM Plex Mono", monospace';
+  ctx.fillText((d.vids ? d.vids.length : 0) + ' videos analyzed', 60, 500);
+
+  // ── RIGHT PANEL: Metrics ──
+  var rx = 520;
+  var metrics = [];
+
+  if (d.isQuickScan) {
+    metrics = [
+      { label: 'TOTAL VIEWS', value: (d.totalViews || 0).toLocaleString(), color: '#ffffff' },
+      { label: 'WATCH TIME DEPTH', value: (d.watchScore || 0) + '/50', color: (d.watchScore||0) >= 35 ? '#4caf7d' : (d.watchScore||0) >= 20 ? '#C9A84C' : '#e05252' },
+      { label: 'UPLOAD VELOCITY', value: d.velScore + '/50', color: d.velScore >= 35 ? '#4caf7d' : d.velScore >= 20 ? '#C9A84C' : '#e05252' },
+      { label: 'VIDEOS', value: String(d.vids ? d.vids.length : 0), color: '#ffffff' },
+    ];
+  } else {
+    metrics = [
+      { label: 'TOTAL VIEWS', value: (d.totalViews || 0).toLocaleString(), color: '#ffffff' },
+      { label: 'AVG CTR', value: (d.avgCTR || 0).toFixed(2) + '%', color: (d.avgCTR||0) >= 4 ? '#4caf7d' : (d.avgCTR||0) >= 3 ? '#C9A84C' : '#e05252' },
+      { label: 'VPI', value: (d.vpi || 0).toFixed(3), color: (d.vpi||0) >= 0.35 ? '#4caf7d' : (d.vpi||0) >= 0.2 ? '#C9A84C' : '#e05252' },
+      { label: 'PRIMARY CONSTRAINT', value: d.constraint ? d.constraint.name.toUpperCase() : '', color: '#e05252' },
+    ];
+  }
+
+  var ry = 110;
+  metrics.forEach(function(m, i) {
+    var y = ry + i * 120;
+    // Label
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = '500 13px "IBM Plex Mono", monospace';
+    ctx.fillText(m.label, rx, y);
+    // Value
+    ctx.fillStyle = m.color;
+    ctx.font = '700 48px "Barlow Condensed", sans-serif';
+    // Truncate long constraint names
+    var val = m.value.length > 22 ? m.value.slice(0, 22) + '...' : m.value;
+    ctx.fillText(val, rx, y + 48);
+    // Divider
+    if (i < metrics.length - 1) {
+      ctx.fillStyle = 'rgba(255,255,255,0.08)';
+      ctx.fillRect(rx, y + 68, W - rx - 60, 1);
+    }
+  });
+
+  // ── BOTTOM BAR ──
+  ctx.fillStyle = 'rgba(201,168,76,0.12)';
+  ctx.fillRect(0, H - 80, W, 80);
+
+  // PT badge text
+  ctx.fillStyle = '#C9A84C';
+  ctx.font = '800 28px "Barlow Condensed", sans-serif';
+  ctx.fillText('PRESSURE', 60, H - 38);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText('TESTED', 60 + ctx.measureText('PRESSURE ').width, H - 38);
+
+  // Tagline
+  ctx.fillStyle = 'rgba(255,255,255,0.35)';
+  ctx.font = '400 14px "IBM Plex Mono", monospace';
+  ctx.fillText('Real Stats. No Hype. Late-Start Wins.', 60, H - 18);
+
+  // CTA right
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.font = '500 16px "IBM Plex Mono", monospace';
+  var cta = 'pressuretested.co';
+  var ctaW = ctx.measureText(cta).width;
+  ctx.fillText(cta, W - 60 - ctaW, H - 30);
+
+  // Download
+  var link = document.createElement('a');
+  link.download = 'pressure-tested-score-' + d.totalScore + '.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
 function resetTool(){
   document.getElementById('results').style.display='none';
   document.getElementById('results').innerHTML='';
