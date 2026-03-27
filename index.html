@@ -1165,17 +1165,12 @@ function generateScoreCard() {
   ctx.font = '800 220px "Barlow Condensed", sans-serif';
   ctx.fillText(d.totalScore, 60, 360);
 
-  // /100
-  ctx.fillStyle = 'rgba(255,255,255,0.25)';
-  ctx.font = '700 80px "Barlow Condensed", sans-serif';
-  ctx.fillText('/100', 60 + ctx.measureText(String(d.totalScore)).width * (80/220) + 10, 360);
-
-  // Score label workaround — measure at actual size
+  // /100 — measure score width at actual render size first
   ctx.font = '800 220px "Barlow Condensed", sans-serif';
   var scoreW = ctx.measureText(String(d.totalScore)).width;
   ctx.fillStyle = 'rgba(255,255,255,0.25)';
   ctx.font = '700 80px "Barlow Condensed", sans-serif';
-  ctx.fillText('/100', 60 + scoreW + 8, 360);
+  ctx.fillText('/100', 60 + scoreW + 8, 350);
 
   // Mode label
   var modeLabel = d.isQuickScan ? 'QUICK SCAN — YOUTUBE API' : 'FULL DIAGNOSTIC — ZIP EXPORT';
