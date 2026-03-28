@@ -728,7 +728,8 @@ function buildScoreHistoryChart(currentScore) {
         ${history.map(function(h, i) {
           var x = pad + (i / (history.length - 1)) * (W - pad * 2);
           var y = H - pad - ((h.score - minScore) / range) * (H - pad * 2);
-          return '<circle cx="' + x + '" cy="' + y + '" r="2.5" fill="rgba(201,168,76,0.5)"/>';
+          return '<circle cx="' + x + '" cy="' + y + '" r="2.5" fill="rgba(201,168,76,0.5)"/>' +
+                 '<text x="' + x + '" y="' + (y - 7) + '" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="rgba(255,255,255,0.5)">' + h.score + '</text>';
         }).join('')}
       </svg>
       <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:4px;">
