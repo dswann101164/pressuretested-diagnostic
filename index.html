@@ -745,6 +745,7 @@ function renderResults(data) {
           constraint, totalsMonths, hasMomentum, detectedNiche, alignScore,
           isQuickScan } = data;
 
+  saveScoreHistory(totalScore);
   const scoreColor = totalScore < 30 ? 'score-danger' : totalScore < 50 ? 'score-warning' : totalScore < 70 ? 'score-ok' : 'score-good';
   const logoSrc = document.querySelector('.logo img').src;
 
@@ -992,7 +993,6 @@ function renderResults(data) {
   const constraintBanner = document.querySelector('#results .constraint-banner');
   constraintBanner.parentNode.insertBefore(breakdownPanel, constraintBanner);
 
-  saveScoreHistory(totalScore);
   document.getElementById('results').style.display = 'block';
   document.getElementById('results').querySelectorAll('.repair-card').forEach(card => {
     card.querySelector('.repair-head').addEventListener('click', () => card.classList.toggle('open'));
